@@ -166,7 +166,7 @@ As for how to test the validity of this code, I temporarily added the previously
 I was curious to try Nvidia's CUDA instead of OpenCL, which only works on Nvidia GPUs. Learning CUDA can be useful because (1) it might be faster, (2) it sure is easier to code, and (3), on Nvidia GPUs, CPUs don't have to busy wait (at least on some GPUs, Nvidia using OpenCL currently causes CPU busy waiting due to an Nvidia printf-in-kernel bug). CUDA currently has no native support for 128-bit integers in device code, so CUDA requires that I find my own 128-bit integer class. Learning to do 128-bit integers can be useful because (1) not all OpenCL implementations have a 128-bit integers and (2) one could perhaps speed up the Collatz algorithm by optimizing this 128-bit-integer code for Collatz.
 
 I obtained 128-bit integers in CUDA via this GitHub project (has a GPL license). The idea is to download a single file into your current folder, and put...  
-#include "cuda_uint128.h"  
+\#include "cuda_uint128.h"  
 in your .cu file. Note that...  
 * multiply and divide require the 2nd argument to be uint64_t
 * a / for division uses div128to64(), which is an unexpected behavior, especially since div128to64() returns (uint64_t)-1 when the quotient overflows uint64_t, so use div128to128() for division (redefining operator/() would break many internal things)
