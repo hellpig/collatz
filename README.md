@@ -47,8 +47,8 @@ I call another algorithm the "repeated k steps" algorithm. This is fastest for t
 
 ## There are many already-known math tricks for greatly speeding up either of the above algorithms
 
-Just reduce n below starting number. By not reducing to 1 and just reducing below the starting number, you only need to do 3.492652 steps on average, which is a *vast* improvement over the 4.8 log2(N) steps of reducing to 1. What I mean by the starting number is the 9 in the following example...
-9 -> 14 -> 7 -> 11 -> 17 -> 26 -> 13 -> 20 -> 10 -> 5 -> 8 -> 4 -> 2 -> 1
+Just reduce n below starting number. By not reducing to 1 and just reducing below the starting number, you only need to do 3.492652 steps on average, which is a *vast* improvement over the 4.8 log2(N) steps of reducing to 1. What I mean by the starting number is the 9 in the following example...  
+9 -> 14 -> 7 -> 11 -> 17 -> 26 -> 13 -> 20 -> 10 -> 5 -> 8 -> 4 -> 2 -> 1  
 Once you get to 7, you stop because it is less than the starting 9. Just 2 steps are needed instead of the above many steps. Then, when you test the starting number of 10, it immediately reduces to 5, so you move to 11. Of course, a good sieve would prevent 9, 10, and 11 from ever being tested, but you get the idea. For this to work, you can't skip anything not excluded by a sieve.
 
 Use a 2^k sieve! As k increases, the fraction of starting numbers you have to test more-or-less exponentially decreases. This is a very standard thing to do. For example, a 2^2 sieve only requires you to run numbers of the form  
@@ -73,15 +73,15 @@ Just because these are known does not mean that modern codes are taking advantag
 
 ## There are various computational tricks to speed things up
 
-64-bit integers, uint64_t, aren't nearly large enough. 128-bit integers are! Overflow very rarely occurs, but, since you'd have to check for overflow regardless, who cares? Just use Python 3 or the GMP library on numbers that overflow. There is no need for larger-than128-bit integers.
+64-bit integers, uint64\_t, aren't nearly large enough. 128-bit integers are! Overflow very rarely occurs, but, since you'd have to check for overflow regardless, who cares? Just use Python 3 or the GMP library on numbers that overflow. There is no need for larger-than128-bit integers.
 
-When checking for overflow, use lookup tables for (~(__uint128_t)0) / 3^c instead of calculating these each time.
+When checking for overflow, use lookup tables for (~(\_\_uint128\_t)0) / 3^c instead of calculating these each time.
 
 For some reason, CPU-only code is fastest using a 3^2 sieve, but GPU code is faster using a 3^1 sieve.
 
 For the 3^1 or 3^2 sieve, you'll need to calculate the modulo operation. There are fast tricks for doing this on 128-bit integers!
 
-For some reason, CPU-only code is fastest using __uint128_t, but GPU code is faster when implementing by-hand 128-bit integers.
+For some reason, CPU-only code is fastest using \_\_uint128\_t, but GPU code is faster when implementing by-hand 128-bit integers.
 
 When coding on GPU, be very mindful that all threads in the work group must wait at a line of code for the slowest thread to get there. Because of this, when checking the 3^1 sieve, instead of using a *continue* (which would cause that thread to wait on other threads), have a small loop that increases A until a suitable number is found.
 
@@ -90,7 +90,7 @@ When coding on GPU, be very mindful that all threads in the work group must wait
 
 ## My "sieveless" approach speeds things up much more!
 
-People save their 2^k sieves to storage drives, preventing huge sieves. Since the fraction of starting numbers you have to test more-or-less exponentially decreases as k increases, huge sieves are greatly desired, causing people to use clever compression tricks.
+People save their 2^k sieves to storage drives, so lack of storage prevents huge sieves. Since the fraction of starting numbers you have to test more-or-less exponentially decreases as k increases, huge sieves are greatly desired, causing people to use clever compression tricks.
 
 My "sieveless" approach does not save the sieve to a storage drive, so *huge* sieves can be used! Each computational task is given a small segment of the huge sieve to generate then test *many* A values.
 
