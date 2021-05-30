@@ -142,5 +142,55 @@ Note that Nvidia has various OpenCL bugs that cause CPU busy waiting (100% usage
 
 ## My "partially sieveless" codes are actually what you should use!
 
+I learned that nearly all of the numbers removed by a deltaN (after checking for reduction in no more than k steps) are from deltaN = 1!  
+For k=21, 38019 numbers need testing using if using all deltaN, 38044 need testing if only using deltaN=1, and 46611 need testing if not using any deltaN.  
+For k=32, 33880411 numbers need testing using if using all deltaN, 33985809 need testing if only using deltaN=1, and 41347483 need testing if not using any deltaN.  
+See largeK.xlsx for numbers that need testing if only using deltaN = 1. I now recommend to set deltaN_max to 1! This allows for a larger k!
+
+I once had the idea of saving out a 2^32 sieve that a "partially sieveless" code could load in to help generate a much larger "sieveless" 2^k sieve. My GPU approach for creating a sieve is to do k steps at a time for all numbers, so, for large deltaN, I'd still have to do k steps for all numbers anyway. My CPU-only approach would benefit, but I didn't think it would benefit enough to be revolutionary. So I settled for only using a 2^2 sieve to help generate a much larger 2^k sieve. However, a deltaN-equals-1 2^k sieve could use this 2^32 sieve very nicely! For each n in the 2^k sieve for which n % 2^32 belongs to the 2^32 sieve, do k steps for n and n-1. In fact, since the 2^32 sieve uses all possible deltaN values, doing k steps for n-1 (that is, using deltaN = 1 instead of deltaN = 0) for the numbers in the 2^32 sieve barely helps. This "partially sieveless" code should now greatly speed up sieve generation allowing for larger k values! Also, for GPU code, TASK_SIZE could be increased more without running out of RAM. I realized that this using-multiple-sieves idea could be great for deltaN=1 when Eric Roosendaal was telling me about how he uses a 2^8 sieve (which only requires 16 numbers to be run), to create a larger sieve.
+
+I will call these codes "partially sieveless" because the smaller sieve of size 2^k1 is saved to disk, so it's not "sieveless" (that is, it's not generated as you go). However, the larger 2^k sieve will be "sieveless" (that is, it is generated as you go).
+
+I mentioned k1 = 32 because a 2^32 sieve can be created in a couple minutes by a single CPU core. The only con of a larger k1 is that the sieve file is harder to create, transfer, and store. Because a buffer is used to load only parts of the 2^k1 sieve, a larger k1 does not use more time or RAM to use. Once you have a large-k1 sieve file, use it! Especially good values for k1 are 32, 35, 37, 40, ... See my largeK.xlsx for why I say this.
+
+Almost everything mentioned in the previous section about "Sieveless" code still applies. Read it!
+
+On CPU, creating the 2^k sieve is vastly faster with this approach! Even though deltaN = 1, the amount of numbers tested by a "partially sieveless" or an any-deltaN "sieveless" code are basically the same partly because the 2^k1 sieve uses any deltaN. There is no need for me to provide speeds because the speeds of a k=51 sieve will be the same as with the "sieveless" approach. The difference from "sieveless" code is that we can now run larger k values! Or, to think if it another way, use the same k value, but commit to a much smaller TASK_SIZE0 or TASK_SIZE_KERNEL2.
+
+On GPU, "partially sieveless" is many times faster than the "sieveless" code for making the sieve, but it doesn't get the extreme speedup that the CPU sees. Perhaps this is because, for "partially sieveless", the different threads in the work group can test a very different number of numbers (the threads in the same work group must wait on the thread that takes the longest time). Note that the "sieveless" code spends most of the time to make the sieve on the CPU (when using my usual Nvidia device), so a very fast GPU would prefer my "partially sieveless" code even more. Feel free to use "partially sieveless" code for CPU and "sieveless" for GPU (or vice versa)! If you do this, as previously discussed, just be sure to use the same k and same TASK_SIZE0 or TASK_SIZE_KERNEL2 (different k1 or k2 values are just fine). Also, for large TASK_SIZE, my "partially sieveless" code uses about 9% of the RAM compared to my "sieveless" code!
+
+As for how to test the validity of this code, I temporarily added the previously-mentioned checksum code. I tested the 2^k1 sieve by removing the 2^k code that does the first k steps, and I tested the 2^k sieve by removing the code that checks against the 2^k1 sieve. When comparing to my "sieveless" codes, keep in mind that 2^k1 uses any deltaN, but the 2^k sieve uses deltaN = 1.
+
+### CUDA and making 128-bit integers by hand
+
+I was curious to try Nvidia's CUDA instead of OpenCL, which only works on Nvidia GPUs. Learning CUDA can be useful because (1) it might be faster, (2) it sure is easier to code, and (3), on Nvidia GPUs, CPUs don't have to busy wait (at least on some GPUs, Nvidia using OpenCL currently causes CPU busy waiting due to an Nvidia printf-in-kernel bug). CUDA currently has no native support for 128-bit integers in device code, so CUDA requires that I find my own 128-bit integer class. Learning to do 128-bit integers can be useful because (1) not all OpenCL implementations have a 128-bit integers and (2) one could perhaps speed up the Collatz algorithm by optimizing this 128-bit-integer code for Collatz.
+
+I obtained 128-bit integers in CUDA via this GitHub project (has a GPL license). The idea is to download a single file into your current folder, and put...  
+#include "cuda_uint128.h"  
+in your .cu file. Note that...  
+* multiply and divide require the 2nd argument to be uint64_t
+* a / for division uses div128to64(), which is an unexpected behavior, especially since div128to64() returns (uint64_t)-1 when the quotient overflows uint64_t, so use div128to128() for division (redefining operator/() would break many internal things)
+* casting to 128-bit works as usual with something like (uint128_t)foo, but casting away from 128-bit requires using .lo
+* a ++ or -- must be placed before the variable (not after it)
+* subtraction always has the 2nd argument be uint128_t
+* addition has a version where the 2nd argument is uint128_t and another that has the 2nd argument be uint64_t, but ++ and += always make the 2nd argument be uint128_t
+* bit shifts and comparisons are included, but *= is not even though -= and += are defined  
+I found many serious errors in the code (causing incorrect arithmetic to be done), so I gave the author the fixes to the errors that I found, and he then updated GitHub with those fixes (some GitHub updates still pending). Then I made some additions to the code to overcome the last three of the above limitations, and then I made some optimizations specific to my Collatz code, so I provided my version of the .h file complete with comments explaining all my changes.
+
+My goal was to keep the CUDA code as similar as I could to my OpenCL code. However, I did make a change to prevent the CPU from busy waiting during kernel2, which I couldn't successfully do on my Nvidia GPU using OpenCL due to Nvidia's less than perfect implementation of OpenCL. I checked this code's validity by temporarily adding in code to calculate checksums (as described above).
+* cuda_uint128.h
+* collatzPartiallySieveless_npp_CUDA.cu
+* collatzPartiallySieveless_repeatedKsteps_CUDA.cu
+
+The CUDA code is about 10% faster than the \_\_uint128\_t OpenCL code!
+
+Since implementing 128-bit integers as two 64-bit integers in OpenCL might be better than using \_\_uint128\_t in OpenCL (or even better than CUDA), I want to try it! In fact, some of my non-Nvidia GPUs have errors with \_\_uint128\_t. However, I still do not recommend using anything but Nvidia due to the unforgivable ulong arithmetic errors that Intel and AMD GPUs make (as previously mentioned). For CUDA, I used Nvidia's assembly language, PTX, via the asm() function in any addition involving 128-bit integers (all other arithmetic used in kernels was done without using PTX). Since OpenCL can run on many GPU types, there is no standard assembly language, so my 128-bit implementation may be slower than \_\_uint128\_t! The following are written in C (because I was curious how it could work in C and because C++ in OpenCL kernels is not yet widely supported), which doesn't allow me to overload operators like I did using C++ for CUDA, so the codes are hard to read!
+* kern1_128byHand.cl
+* kern2_npp_128byHand.cl
+* kern2_repeatedKsteps_128byHand.cl
+
+I tested speeds on a Nvidia Quadro P4000. The 128byHand codes are always faster than the older OpenCL codes. CUDA seems to be faster than these 128byHand codes when TASK_SIZE_KERNEL2 is quite large, and these 128byHand codes seem to be faster than CUDA when TASK_SIZE is quite large.
+
+Using by-hand uint128_t is faster than native \_\_uint128\_t on GPU, which was surprisingly, so trying CPU-only code that does uint128_t seems like a good idea. Partly because cuda_uint128.h has limitations (for example, cannot divide by uint128_t), my goal is always to use the minimal amount of by-hand code, so, on GPU, I only changed the kernel code. For OpenCL, since some of my devices don't like the native 128-bit implementation (won't compile or will give arithmetic errors), all 128-bit integers in kernels was made to be by-hand. For CUDA, I had to change all the code in the kernels because there is no alternative. For CPU-only code, I just need everything in the main loop (over patterns) to be by-hand, which collatzPartiallySieveless_128byHand.cpp does. On my I5-3210M CPU, 128byHand is slower, though maybe ARM CPUs would be different?
 
 
