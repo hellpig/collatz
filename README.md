@@ -23,7 +23,7 @@ For OpenCL on Windows, you need Cygwin. Select the gcc-core and libOpenCL-devel 
 
 Nvidia on Windows has a weird thing for OpenCL (maybe CUDA too). A printf() inside an OpenCL kernel needs *llu* for ulong (*lu* only prints 32 bits), but, even though this is OpenCL and *lu* works on Windows with Intel and AMD GPUs, needing *llu* is a typical Windows thing I guess. On second thought, a long integer is always 64-bit in OpenCL, so this behavior by Nvidia is actually a bug. Luckily, *llu* works for Nvidia-on-Linux and for a couple other situations, so I just switched all my OpenCL kernels to use *llu*. Anyway, I wonder if PRIu64 works in OpenCL for all devices and platforms. 
 
-At any point, please ask me if anything here is unclear! I achieved my codes by communicating with various people!
+At any point, please ask me if anything here is unclear! I achieved my codes by communicating with various people, so please do the same!
 
 
 
