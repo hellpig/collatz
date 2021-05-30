@@ -13,7 +13,7 @@ To compile CPU-only and OpenCL code, I use gcc or clang. To compile CUDA code, I
 
 To test OpenCL on your system, see **testBug64.c**, **testBug128.c**, and **cldemo.c**.
 
-Unless mentioned otherwise, GPU code is for Nvidia GPUs because I found many unforgivable arithmetic errors from Intel and AMD GPUs. Even if using OpenCL instead of CUDA, Nvidia requires that you install Nvidia CUDA Toolkit.
+Unless mentioned otherwise, GPU code is for Nvidia GPUs because I found many unforgivable arithmetic errors from Intel and AMD GPUs. Even if using OpenCL instead of CUDA, Nvidia requires that you install Nvidia CUDA Toolkit. Unless mentioned otherwise, GPU code is OpenCL.
 
 I of course would recommend Linux as your OS.
 
@@ -174,7 +174,8 @@ in your .cu file. Note that...
 * a ++ or -- must be placed before the variable (not after it)
 * subtraction always has the 2nd argument be uint128_t
 * addition has a version where the 2nd argument is uint128_t and another that has the 2nd argument be uint64_t, but ++ and += always make the 2nd argument be uint128_t
-* bit shifts and comparisons are included, but *= is not even though -= and += are defined  
+* bit shifts and comparisons are included, but \*= is not even though -= and += are defined
+
 I found many serious errors in the code (causing incorrect arithmetic to be done), so I gave the author the fixes to the errors that I found, and he then updated GitHub with those fixes (some GitHub updates still pending). Then I made some additions to the code to overcome the last three of the above limitations, and then I made some optimizations specific to my Collatz code, so I provided my version of the .h file complete with comments explaining all my changes.
 
 My goal was to keep the CUDA code as similar as I could to my OpenCL code. However, I did make a change to prevent the CPU from busy waiting during kernel2, which I couldn't successfully do on my Nvidia GPU using OpenCL due to Nvidia's less than perfect implementation of OpenCL. I checked this code's validity by temporarily adding in code to calculate checksums (as described above).
