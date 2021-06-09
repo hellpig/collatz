@@ -7,6 +7,8 @@ What is the Collatz conjecture?
 
 The goal of my codes is to test numbers for 128-bit overflow (these numbers could go off to infinity) and for infinite cycles (these numbers would never finish running). If code detects overflow, Python 3 can easily check it; see my **collatzTestOverflow.py**. The GMP library could also be used, but only use it on the numbers that overflow because it's slow!
 
+I have not run this code to get new results, nor do I care to. If you want to run it (on BOINC for example), let me know, and I can help.
+
 Note that, when I count steps, I count (3n + 1)/2 as one step. It's the natural way of counting steps.
 
 To compile CPU-only and OpenCL code, I use gcc or clang. To compile CUDA code, I use nvcc.
@@ -49,7 +51,7 @@ I call another algorithm the "repeated k steps" algorithm. This is fastest for t
 
 Just reduce n below starting number. By not reducing to 1 and just reducing below the starting number, you only need to do 3.492652 steps on average, which is a *vast* improvement over the 4.8 log2(N) steps of reducing to 1. What I mean by the starting number is the 9 in the following example...  
 9 -> 14 -> 7 -> 11 -> 17 -> 26 -> 13 -> 20 -> 10 -> 5 -> 8 -> 4 -> 2 -> 1  
-Once you get to 7, you stop because it is less than the starting 9. Just 2 steps are needed instead of the above many steps. Then, when you test the starting number of 10, it immediately reduces to 5, so you move to 11. Of course, a good sieve would prevent 9, 10, and 11 from ever being tested, but you get the idea. For this to work, you can't skip anything not excluded by a sieve.
+Once you get to 7, you stop because it is less than the starting 9. Just 2 steps are needed instead of the above many steps. Then, when you test the starting number of 10, it immediately reduces to 5, so you move to 11. Of course, a good sieve would prevent 9, 10, and 11 from ever being tested, but you get the idea. For this to work, you must start with testing 1, then, as you increase, you can't skip anything not excluded by a sieve.
 
 Use a 2^k sieve! As k increases, the fraction of starting numbers you have to test more-or-less exponentially decreases. This is a very standard thing to do. For example, a 2^2 sieve only requires you to run numbers of the form  
 A 2^2 + 3  
@@ -57,7 +59,7 @@ because all other numbers reduce after k=2 steps. So you only need to test 25% o
 In general, a 2^k sieve considers starting numbers of the form  
 A 2^k + B  
 where B < 2^k, and only certain B need to be run.  
-The 2^k sieve also has the advantage of pre-calculating the first k steps of the remaining starting numbers. For each B, calculate its value after k steps, fk(B), while counting the number of steps that are increases, (c), then A 2^k + B after k steps is  
+The 2^k sieve also has the advantage of pre-calculating the first k steps of the remaining starting numbers. For each B, calculate its value after k steps, fk(B), while counting the number of steps that are increases, c, then A 2^k + B after k steps is  
 A 3^c + fk(B)  
 This speeds things up if you run a bunch of A values using this same fk(B) and c.
 
@@ -67,7 +69,7 @@ Use a 3^1 or 3^2 sieve! A nice optimization is to not run n%3==2 numbers because
 A better sieve can be to also exclude n%9==4 numbers. This is a 3^2 sieve. Any n = 9N + 4 number always follows the already tested 8N + 3.  
 There are tons of these rules, but almost all exclusions occur with the above rules. For example, all mod 3^9 rules will block only a few percent more n than a 3^2 sieve, but you won't gain because checking against these rules takes time.
 
-Just because these are known does not mean that modern codes are taking advantage of them! For example, the BOINC project by Jon Sonntag is garbage.
+Just because these are known does not mean that modern codes are taking advantage of them! For example, the BOINC project by Jon Sonntag is not good at all, as I explain here: [https://boinc.berkeley.edu/forum_thread.php?id=14159](https://boinc.berkeley.edu/forum_thread.php?id=14159)
 
 
 
