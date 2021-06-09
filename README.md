@@ -75,7 +75,7 @@ Just because these are known does not mean that modern codes are taking advantag
 
 ## There are various computational tricks to speed things up
 
-64-bit integers, uint64\_t, aren't nearly large enough. 128-bit integers are! Overflow very rarely occurs, but, since you'd have to check for overflow regardless, who cares? Just use Python 3 or the GMP library on numbers that overflow. There is no need for larger-than128-bit integers.
+64-bit integers, uint64\_t, aren't nearly large enough. 128-bit integers are! Overflow very rarely occurs when using 128-bit integers, but, since you'd have to check for overflow regardless, who cares? Just use Python 3 or the GMP library on numbers that overflow. There is no need for larger-than128-bit integers.
 
 When checking for overflow, use lookup tables for (~(\_\_uint128\_t)0) / 3^c instead of calculating these each time.
 
@@ -85,7 +85,7 @@ For the 3^1 or 3^2 sieve, you'll need to calculate the modulo operation. There a
 
 For some reason, CPU-only code is fastest using \_\_uint128\_t, but GPU code is faster when implementing by-hand 128-bit integers.
 
-When coding on GPU, be very mindful that all threads in the work group must wait at a line of code for the slowest thread to get there. Because of this, when checking the 3^1 sieve, instead of using a *continue* (which would cause that thread to wait on other threads), have a small loop that increases A until a suitable number is found.
+When coding on GPU, be very mindful that all threads in the work group must wait at a line of code for the slowest thread to get there. Because of this, when checking the 3^1 sieve, instead of using a *continue* (which would cause that thread to wait on other threads), have a small loop that increases A until a suitable number is found. Also, the *goto even* I use in CPU-only code is not at all helpful on GPU.
 
 
 
