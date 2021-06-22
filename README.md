@@ -241,4 +241,17 @@ Also, in all my kernel2 (or kern2) files, I for some reason calculate N0 each it
 1. In many of my kernels, I calculate the powers of 3 and save them into shared/local RAM. Is there a better way? I also do this calculation using only 1 thread in the group of threads that is sharing the RAM (while the other threads wait), but I don't see why I couldn't use more threads! Currently, each power of 3 is calculated from scratch instead of multiplying the previous value by 3.
 1. In some of my kernels, I set alpha and beta variables to size_t since they are used to index arrays, but would it be faster to use 32-bit integers?
 1. I always wonder if I've optimized the very-low-level stuff. For example, in kern2_128byHand.cl, I do *mulEquals(N, (ulong)lut[alpha])*, but this actually might cause *(ulong)lut[alpha]* to be calculated more than once since mulEquals() is a macro. I'm not about to dig into the assembly code to see how the compiler optimizes this. Would it be better to get *(ulong)lut[alpha]* before calling mulEquals()? I'm sure there are lots of possible low-level optimizations for either my CUDA or OpenCL by-hand implementations of 128-bit integers, perhaps these.
-1. For my "n++ n--" kernel2 codes, I should try removing the loop around the code that increases the number according to the number of trailing zeros (the loop between the "n++" and the "n--"). If I do this, I should also remove the loop around the decreases. For my 128byHand codes, I don't think removing these loops may not be possible because bit shifting by 0 is undefined in my 128byHand codes. 
+1. For my "n++ n--" kernel2 codes, I should try removing the loop around the code that increases the number according to the number of trailing zeros (the loop between the "n++" and the "n--"). If I do this, I should also remove the loop around the decreases. For my 128byHand codes, I don't think removing these loops may not be possible because bit shifting by 0 is undefined in my 128byHand codes.
+
+
+
+## Many thanks to...
+
+David Bařina was extremely helpful in helping me understand the math! Also, I greatly appreciate his code being on GitHub.
+
+Brad Philipbar let me SSH into his fantastic machine so that I could use an Nvidia GPU!
+
+A couple conversations with Eric Roosendaal proved very helpful!
+
+I also want to anonymously thank a couple people for letting me talk about Collatz stuff, helping me come up with new ideas!
+
