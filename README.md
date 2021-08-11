@@ -4,6 +4,7 @@ I have made the world's fastest codes for CPU and GPU!
 
 What is the Collatz conjecture?  
 [https://youtu.be/5mFpVDpKX70](https://youtu.be/5mFpVDpKX70)
+[https://youtu.be/094y1Z2wpJg](https://youtu.be/094y1Z2wpJg)
 
 The goal of my codes is to test numbers for 128-bit overflow (these numbers could go off to infinity) and for infinite cycles (these numbers would never finish running). If code detects overflow, Python 3 can easily check it; see my **collatzTestOverflow.py**. The GMP library could also be used, but only use it on the numbers that overflow because it's slow!
 
