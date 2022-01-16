@@ -10,7 +10,9 @@ nStart = 340282366920938463463374607431768211455   # 2^128 - 1
 nStart = 55247846101001863167
 # source:
 #   http://pcbarina.fit.vutbr.cz/path-records.htm
-# not great source since given Mx must be divided by 2 before doing B(Mx)...
+#
+# The following is not a great source
+# since given Mx must be divided by 2 before doing B(Mx)...
 #   http://www.ericr.nl/wondrous/pathrecs.html
 
 nStart = 274133054632352106267
