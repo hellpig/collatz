@@ -1,14 +1,14 @@
 # Experimentally testing the Collatz conjecture
 
-I have made the world's fastest codes for CPU and GPU!
+For experimentally testing the Collatz conjecture, I have made the world's fastest codes for CPU and GPU!
 
 What is the Collatz conjecture?  
-[https://youtu.be/5mFpVDpKX70](https://youtu.be/5mFpVDpKX70)
+[https://youtu.be/5mFpVDpKX70](https://youtu.be/5mFpVDpKX70)  
 [https://youtu.be/094y1Z2wpJg](https://youtu.be/094y1Z2wpJg)
 
-The goal of my codes is to test numbers for 128-bit overflow (these numbers could go off to infinity) and for infinite cycles (these numbers would never finish running). If code detects overflow, Python 3 can easily check it; see my **collatzTestOverflow.py**. The GMP library could also be used, but only use it on the numbers that overflow because it's slow!
+The goal of my codes is to test numbers for 128-bit overflow (these numbers could go off to infinity) and for infinite cycles (these numbers would never finish running). If the code detects overflow, Python 3 can easily check it; see my **collatzTestOverflow.py**. The GMP library could also be used, but only use it on the numbers that overflow because it's slow! I do not use GMP.
 
-I have not run this code to get new results, nor do I care to. If you want to run it (on BOINC for example), let me know, and I can help.
+I have not run this code on a supercomputer to get new results, nor do I care to. If you want to run it (on BOINC for example), let me know, and I can help.
 
 Note that, when I count steps, I count (3n + 1)/2 as one step. It's the natural way of counting steps.
 
@@ -37,7 +37,7 @@ I call one algorithm the "n++ n--" algorithm (or, in my filenames, just "npp"). 
 [http://www.ericr.nl/wondrous/pathrecs.html](http://www.ericr.nl/wondrous/pathrecs.html)  
 The algorithm is described in a great paper and corresponding GitHub code [1]. Unlike his codes, I currently do not try to find the max n in my code, but adding this capability would be very easy.
 
-I call another algorithm the "repeated k steps" algorithm. This is fastest for testing the Collatz conjecture (and for counting steps to 1). The algorithm is described here [2].
+I call another algorithm the "repeated k steps" algorithm. This is fastest for testing the Collatz conjecture (and for counting steps to 1). The algorithm is described in [2].
 
 [1] Bařina, David. (2020). Convergence verification of the Collatz problem. The Journal of Supercomputing. 10.1007/s11227-020-03368-x.  
 [https://rdcu.be/b5nn1](https://rdcu.be/b5nn1)  
@@ -60,7 +60,7 @@ because all other numbers reduce after k=2 steps. So you only need to test 25% o
 In general, a 2^k sieve considers starting numbers of the form  
 A 2^k + B  
 where B < 2^k, and only certain B need to be run.  
-The 2^k sieve also has the advantage of pre-calculating the first k steps of the remaining starting numbers. For each B, calculate its value after k steps, fk(B), while counting the number of steps that are increases, c, then A 2^k + B after k steps is  
+The 2^k sieve also has the advantage of allowing you to make lookup tables for pre-calculating the first k steps of the remaining starting numbers. For each B, calculate its value after k steps, fk(B), while counting the number of steps that are increases, c, then A 2^k + B after k steps is  
 A 3^c + fk(B)  
 This speeds things up if you run a bunch of A values using this same fk(B) and c.
 
