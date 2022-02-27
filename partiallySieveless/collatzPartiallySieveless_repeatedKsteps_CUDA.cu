@@ -196,7 +196,7 @@ const uint8_t sieve8_host[16] = {27, 31, 47, 71, 91, 103, 111, 127, 155, 159, 16
 
 
 /*
-  kernel1 makes k1 sieve
+  kernel1 makes 2^k sieve
 */
 
 
