@@ -339,7 +339,7 @@ Further analysis would be required if this occurs.
 To find these, you may need to go to the "awesome\_ops" webpage, then go to Results, then you can search for in-progress tasks sorted by send-time.
 
 It is very important that tasks are not skipped, so find the oldest not-yet-returned workunit (as described above), then make sure all tasks have successfully returned between the last time you checked up to the oldest not-yet-returned workunit.  
-Not wanting to skip tasks is why I require validation (due to things like most people not having ECC RAM).
+Not wanting to skip tasks is why I require validation (due to things like most people not having ECC memory).
 
 To remove old tasks from the database server, run db\_purge...  
 [https://boinc.berkeley.edu/trac/wiki/DbPurge](https://boinc.berkeley.edu/trac/wiki/DbPurge)
@@ -356,11 +356,14 @@ More info about the database...
 
 ## things you'd have to do if making a public BOINC server
 
-Add checkpoints in the code using the following line...
+Add checkpoints in the code next to the following line...
 ```
 boinc_fraction_done((double)pattern/patternEndDouble);
 ```
-BOINC's original upper\_case.cpp (before my edits) shows how to make and load from checkpoints.
+BOINC's original upper\_case.cpp (before my edits) shows how to make and load from checkpoints. If saving checksums is slow, perhaps take care of checkpoints in the following conditional...
+```
+if (bufferStep >= bufferStepMax)
+```
 
 Perhaps add some amount to *aStart* manually (GPU code requires you to change h\_minimum and h\_supremum) to match current experimental progress in published academic papers (that is, ignore the "progress" from Jon Sonntag's BOINC project). The CPU-only and GPU codes must have identical settings.
 
@@ -382,6 +385,7 @@ When setting these parameters, keep in mind that...
 [https://boinc.berkeley.edu/trac/wiki/CreditOptions](https://boinc.berkeley.edu/trac/wiki/CreditOptions)  
 [https://boinc.berkeley.edu/wiki/Computation_credit](https://boinc.berkeley.edu/wiki/Computation_credit)
 
+After choosing your parameters, you might want to add code to the work generator that prevents taskID from getting too large. If a taskID that is too large is about to be used, exit(1) should be called.
 
 
 
@@ -401,7 +405,7 @@ Set CHUNKS\_KERNEL2 to prevent the 4.5-second time limit from being reached, whi
 
 The GPU code uses 2^TASK\_SIZE bytes of RAM. The CPU-only code uses essentially no RAM.
 
-You'll want to add checksums just like I did for CPU-only code. See the checksum\_alpha[] variable here...
+You'll want to add checksums just like I did for CPU-only code. See the checksum\_alpha[] variable here...  
 [https://github.com/xbarin02/collatz/blob/master/src/gpuworker/kernel32-precalc.cl](https://github.com/xbarin02/collatz/blob/master/src/gpuworker/kernel32-precalc.cl)
 
 An output array for kern2 (instead of relying on in-kernel printf()) may be needed because I'm not sure that BOINC can capture stdout of an in-kernel printf(). Or maybe the checksum array could double as this.
