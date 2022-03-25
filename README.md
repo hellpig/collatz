@@ -126,7 +126,7 @@ Here are the steps to setting your parameters...
 
 If you want to run both the GPU and CPU-only code simultaneously, be sure to use the same sieve size for both, and have the size controlled by the first task ID be the same for both. I would normally say that TASK_SIZE needs to also be the same, but, if the CPU-only tasks need to finish in a certain time, it may be best to set TASK_SIZE differently: the CPU-only should have a lower one. This would require just a bit of organization when setting the second task ID to make sure that the tiny CPU-only tasks fit around the GPU tasks and to make sure that all of the sieve is eventually run.
 
-If you have already have up to some number tested by a non-sieveless approach, you can still easily use this sieveless approach! For my CPU-only code, adjust aStart manually. For my GPU code, adjust h_minimum and h_supremum in kernel2, keeping in mind that integer literals larger than 64-bit don't work (so use bit shifts).
+If you have already have up to some number tested by a non-sieveless approach, you can still easily use this sieveless approach! For my CPU-only code, adjust aStart manually. For my GPU code, adjust h_minimum and h_supremum in kernel2, keeping in mind that integer literals larger than 64-bit don't work (so use bit shifts). If you do this, be sure to change the "aMod = 0" line!
 
 If you want to use general GPUs...
 * For computers with watchdog timers, a maxSteps variable must be introduced, and a message should be printed whenever testing a number goes beyond those steps. Having a way to detect an infinite cycle or a number that is slowly making its way to infinity is crucial.
