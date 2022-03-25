@@ -168,7 +168,7 @@ cat out
 
 I haven't figured out how to get things to compile on Windows.
 
-See upper\_case\_template.cpp here in my GitHub for how to easily modify upper\_case.cpp. Just put global code where is says to, then put the main() code where it says to.
+See my **upper\_case\_template.cpp** here in my GitHub for how to easily modify BOINC's original upper\_case.cpp. Just put global code where is says to, then put the main() code where it says to.
 
 
 
@@ -180,7 +180,7 @@ In addition to the changes already made to the work generator...
 ```
 include <cinttypes>
 ```
-* Declare a global variable
+* Declare global variables
 ```
 uint64_t taskID;
 FILE* taskIDfile;
@@ -238,13 +238,13 @@ partiallySieveless/collatzPartiallySieveless_repeatedKsteps.c
 
 The CPU-only code uses essentially no RAM.
 
-I added the code into my upper_case_template.cpp to create the upper_case.cpp file. When doing this, I made the following modifications...
+I added the code into my upper_case_template.cpp to create the **upper_case.cpp** file here on GitHub. When doing this, I made the following modifications...
 * Got rid of the timing code (including "#include <sys/time.h>") because printing runtime to the out file affects validation
-* My  
+* My instances of  
   return 0;  
 that appear following errors were replaced with  
 exit(-1);
-* stdout is not captured, so printf() changed to out.printf(), and fflush(stdout) changed to out.flush(). I moved  
+* I don't think stdout can be captured, so printf() changed to out.printf(), and fflush(stdout) changed to out.flush(). I moved  
 MFILE out;  
 to be global (above *my* global stuff) so that functions can use it.
 * When printing to out, I also print to stderr via  
@@ -280,6 +280,7 @@ uint64_t patternEnd = ((uint64_t)1 << (TASK_SIZE - 8));
 double patternEndDouble = (double)patternEnd;
 boinc_fraction_done((double)pattern / patternEndDouble);
 ```
+* Because my code was C and I'm now compiling it as C++ for BOINC, I had to make a few minor changes to the part of the code that makes the 2^k2 lookup table.
 
 &nbsp;  
 &nbsp;  
@@ -321,7 +322,7 @@ Copy upper\_case to this folder, renaming it to example\_app\_103\_x86\_64-pc-li
 </version>
 ```
 
-The sieve37 file will not have to be downloaded to the client for each task (just the client's first task). However, if I set "no new tasks" and let all tasks finish, sieve37 would be deleted on client's computer (the sieve is also deleted if the server runs out of tasks to send and my client has finished running of all of its tasks).
+The sieve37 file will not have to be downloaded to the client for each task (just the client's first task). However, if on my client I set "no new tasks" and let all tasks finish, sieve37 would be deleted on my client's computer (the sieve is also deleted if the server runs out of tasks to send and my client has finished running of all of its tasks). Is there a way to keep the sieve37 file on the client's computer until the BOINC application is updated?
 
 Then, do the usual to create the new version...
 ```
@@ -360,16 +361,16 @@ Add checkpoints in the code next to the following line...
 ```
 boinc_fraction_done((double)pattern/patternEndDouble);
 ```
-BOINC's original upper\_case.cpp (before my edits) shows how to make and load from checkpoints. If saving checkpoints is slow, perhaps take care of checkpoints in the following conditional...
+BOINC's original upper\_case.cpp (before my edits) shows how to make and load from checkpoints. If saving checkpoints is slow, perhaps take care of checkpoints in the following conditional instead...
 ```
 if (bufferStep >= bufferStepMax)
 ```
 
-Perhaps add some amount to *aStart* manually (GPU code requires you to change h\_minimum and h\_supremum) to match current experimental progress in published academic papers (that is, ignore the "progress" from Jon Sonntag's BOINC project). The CPU-only and GPU codes must have identical settings.
+Perhaps add some amount to *aStart* manually (GPU code requires you to add to both change h\_minimum and h\_supremum) to match current experimental progress in published academic papers (that is, ignore the "progress" from Jon Sonntag's BOINC project). The CPU-only and GPU codes must have identical settings, and this setting cannot be changed until TASK\_SIZE0 (for GPU, TASK\_SIZE\_KERNEL2) has completed. If you do this, be sure to fix the "aMod = 0" line!
 
 In both of the original .c files (one for CPU-only and one for GPU), read the comment about the "times 9" and decide if you want to remove it. If you remove it in CPU-only, remove it in GPU code too, and vice versa.
 
-To prevent people hacking your project, add some encryption, then don't post your encryption code on GitHub.
+To prevent people hacking your project to get free BOINC credits, add some encryption and a secret phrase to be encrypted, then don't post your encryption code on GitHub. I'm not sure how much this would matter if you have one\_result\_per\_user\_per\_wu changed to 1 and if your project doesn't give a huge amount of credit, but it is worth doing.
 
 Set the parameters in the code in this order...
 1. For TASK\_ID\_KERNEL2 = 0 in GPU code (and TASK\_SIZE0 in CPU-only code), assuming that you got rid of the "time 9", maybe start with TASK\_SIZE\_KERNEL2 of 71.  
