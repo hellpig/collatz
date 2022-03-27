@@ -403,12 +403,11 @@ After choosing your parameters, you might want to add code to the work generator
 
 ## things you'd have to do to get the GPU code to work in BOINC
 
-For the GPU code, look in the partiallySieveless\_nonNvidiaGPU folder for the following files...
+For the GPU code, look in the partiallySieveless\_nonNvidiaGPU folder for the following files (even though they say "nonNvidia", they still work on Nvidia.)...
 * collatzPartiallySieveless\_repeatedKsteps\_GPU\_nonNvidia.c
 * kern1\_128byHand\_nonNvidia.cl
 * kern1\_2\_repeatedKsteps\_nonNvidia.cl
-* kern2\_repeatedKsteps\_128byHand\_nonNvidia.cl  
-Even though these say "nonNvidia", they still work on Nvidia.
+* kern2\_repeatedKsteps\_128byHand\_nonNvidia.cl
 
 Unlike the CPU-only code, there are time-limits and step-limits (due to watchdog timers). So, to check if an infinite cycle exists that disproves the conjecture, you have to check for limits being reached.
 
