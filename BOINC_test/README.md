@@ -345,13 +345,19 @@ cp ~/boinc-src/sched/sample_work_generator ~/projects/awesome/bin/
 bin/start
 ```
 
-As the project runs, carefully check the files in the sample\_results folder (use grep). If there is 128-bit integer overflow, this could be a number that disproves the Collatz conjecture! Much more likely, it is a very rare instance of the number getting too large before it finds its way to lower than where it started. You can use my collatzTestOverflow.py file to check numbers that overflow. My C code carefully checks if overflow will happen, then prints whenever overflow will occur so that you know to run this script.
+As the project runs, carefully check the files in the sample\_results folder (use grep). If there is 128-bit integer overflow, this could be a number that disproves the Collatz conjecture! Much more likely, it is a very rare instance of the number getting too large before it finds its way to lower than where it started. You can use my collatzTestOverflow.py file to check numbers that overflow. My C code carefully checks if overflow will happen, then prints whenever overflow will occur so that you know to run this script.  
+Ideally, your BOINC assimilator would be programmed to do this...  
+https://boinc.berkeley.edu/trac/wiki/AssimilateIntro
 
 If the CPU-only code never completes, you may have found an infinite cycle that disproves the Collatz conjecture!
-Further analysis would be required if this occurs. You should carefully search for this!  
-To find these, you may need to go to the "awesome\_ops" webpage, then go to Results, then you can search for in-progress tasks sorted by send-time.
+Further analysis would be required if this occurs. Even though it seems unlikely that a cycle would not overflow 128-bit integers (due to the minimum cycle length being over 17 million steps), you should carefully search for this!  
+To find these, you could go to the "awesome\_ops" webpage, then go to Results, then you can search for in-progress tasks sorted by send-time.  
+Also, look through the *errors* file (made by the assimilator in sample_results/ folder).  
+You could speed up this process via...  
+https://boinc.berkeley.edu/trac/wiki/ProjectOptions#Acceleratingretries
 
 It is very important that tasks are not skipped, so find the oldest not-yet-returned workunit (as described above), then make sure all tasks have successfully returned between the last time you checked up to the oldest not-yet-returned workunit.  
+Ideally, your assimilator would make a list of completed task\_IDs, where, in an *initial* consecutive group, all but the final task\_ID can be deleted from the list.  
 Not wanting to skip tasks is why I also require that tasks validate against another computer (due to things like most people not having ECC memory).
 
 To remove old tasks from the database server, run db\_purge...  
@@ -359,7 +365,7 @@ To remove old tasks from the database server, run db\_purge...
 ```
 bin/db_purge --min_age_days 7 --one_pass
 ```
-or, better yet, run it as a daemon.
+or, better yet, run it as a daemon (edit config.xml to do this; don't use the --one_pass option for daemon).
 
 More info about the database...  
 [https://boinc.berkeley.edu/trac/wiki/DataBase](https://boinc.berkeley.edu/trac/wiki/DataBase)  
