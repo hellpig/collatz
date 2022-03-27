@@ -223,6 +223,10 @@ rewind(taskIDfile);
 &nbsp;  
 &nbsp;  
 
+
+
+
+
 Then compile the work generator.
 
 Initialize the taskID file. My computer is called pinkslime, but yours will be called something else!
@@ -239,7 +243,7 @@ partiallySieveless/collatzPartiallySieveless_repeatedKsteps.c
 The CPU-only code uses essentially no RAM.
 
 I added the code into my upper_case_template.cpp to create the **upper_case.cpp** file here on GitHub. When doing this, I made the following modifications...
-* Got rid of the timing code (including "#include <sys/time.h>") because printing runtime to the out file affects validation
+* Got rid of the timing code (including "#include \<sys/time.h\>") because printing runtime to the out file affects validation
 * My instances of  
   return 0;  
 that appear following errors were replaced with  
@@ -282,9 +286,15 @@ boinc_fraction_done((double)pattern / patternEndDouble);
 ```
 * Because my code was C and I'm now compiling it as C++ for BOINC, I had to make a few minor changes to the part of the code that makes the 2^k2 lookup table.
 
+* I made many changes to allow for checkpoints within the BOINC client. A couple of the less obvious things that I added to the code to allow for checkpoints were "#include \<cinttypes\>" and seeking the sieve file to the new location. Reduce the value of *bufferBytes* to increase the rate of checkpoints. When testing this out, keep in mind that the BOINC client has a computing setting that prevents checkpoints from being saved faster than a set frequency.
+
 &nbsp;  
 &nbsp;  
 &nbsp;  
+
+
+
+
 
 I want to use the 2^37 sieve created by partiallySieveless/collatzCreateSieve.c, renamed as sieve37, which is a 1.07 GB sieve. Put sieve37 in the apps/example_app/ folder.
 Other good choices for k1 are 32 and 35...
@@ -296,6 +306,8 @@ Other good choices for k1 are 32 and 35...
 
 You can compile and test the code via something like
 ```
+cd ~/boinc-src/apps/
+make
 echo 0 > in
 ln -s ~/projects/awesome/apps/example_app/sieve37 .
 ./upper_case
@@ -359,20 +371,16 @@ More info about the database...
 
 ## things you'd have to do if making a public BOINC server
 
-Add checkpoints in the code next to the following line...
-```
-boinc_fraction_done((double)pattern/patternEndDouble);
-```
-BOINC's original upper\_case.cpp (before my edits) shows how to make and load from checkpoints. If saving checkpoints is slow, perhaps take care of checkpoints in the following conditional instead...
-```
-if (bufferStep >= bufferStepMax)
-```
+Currently, if 128-bit overflow is detected in the CPU-only code, the code immediately prints to the *out* file. However, if the code resets back to a checkpoint before the next checkpoint is saved, I believe that the 128-bit-overflow message is printed again. The *out* files of different computers doing the same task will now differ and they will not validate. This should be EXTREMELY rare, but, if you want, there are many ways to fix this: (1) save 128-bit-overflow messages to a string that is only saved to *out* when writing a checkpoint, (2) when printing the 128-bit-overflow message scan *out* to see if it already exists, or (3) edit the validator. I feel like the best fix is to edit the validator to be more resilient.
 
 Perhaps add some amount to *aStart* manually (GPU code requires you to add to both change h\_minimum and h\_supremum) to match current experimental progress in published academic papers (that is, ignore the "progress" from Jon Sonntag's BOINC project). The CPU-only and GPU codes must have identical settings, and this setting cannot be changed until TASK\_SIZE0 (for GPU, TASK\_SIZE\_KERNEL2) has completed. If you do this, be sure to fix the "aMod = 0" line!
 
 In both of the original .c files (one for CPU-only and one for GPU), read the comment about the "times 9" and decide if you want to remove it. If you remove it in CPU-only, remove it in GPU code too, and vice versa.
 
 To prevent people hacking your project to get free BOINC credits, add some encryption and a secret phrase to be encrypted, then don't post your encryption code on GitHub. I'm not sure how much this would matter if you have one\_result\_per\_user\_per\_wu changed to 1 and if your project doesn't give a huge amount of credit, but it is worth doing.
+
+On a related security note, here is something you should do instead of what I have been doing...  
+https://boinc.berkeley.edu/trac/wiki/CodeSigning
 
 Set the parameters in the code in this order...
 1. For TASK\_ID\_KERNEL2 = 0 in GPU code (and TASK\_SIZE0 in CPU-only code), assuming that you got rid of the "time 9", maybe start with TASK\_SIZE\_KERNEL2 of 71.  
