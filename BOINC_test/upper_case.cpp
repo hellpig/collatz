@@ -1,7 +1,6 @@
-// A wrapper for sticking my code into the BOINC server's example_app
 // Modified from apps/upper_case.cpp to run Collatz code!
 // No Graphics
-// No command line options
+// No command-line options
 
 #ifdef _WIN32
 #include "boinc_win.h"
