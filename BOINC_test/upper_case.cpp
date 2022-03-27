@@ -1,11 +1,7 @@
 // A wrapper for sticking my code into the BOINC server's example_app
-// Modified from apps/upper_case.cpp
+// Modified from apps/upper_case.cpp to run Collatz code!
 // No Graphics
-// No wasting CPU time
-// No checkpoints
-//
-// command line options
-// -cpu_time N
+// No command line options
 
 #ifdef _WIN32
 #include "boinc_win.h"
@@ -29,6 +25,7 @@
 
 using std::string;
 
+#define CHECKPOINT_FILE "collatz_state"
 #define INPUT_FILENAME "in"
 #define OUTPUT_FILENAME "out"
 
@@ -45,6 +42,7 @@ MFILE out;
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <cinttypes>
 
 
 
@@ -117,12 +115,24 @@ void print128(__uint128_t n) {
   out.flush();
 }
 
-uint64_t checksum_alpha = 0;
 
+int do_checkpoint(uint64_t a, uint64_t b, uint64_t c) {
+    // print a,b,c to CHECKPOINT_FILE
 
+    int retval;
+    string resolved_name;
 
+    FILE* f = fopen("temp", "w");
+    if (!f) return 1;
+    fprintf(f, "%" PRIu64 " %" PRIu64 " %" PRIu64, a, b, c);
+    fclose(f);
 
+    boinc_resolve_filename_s(CHECKPOINT_FILE, resolved_name);
+    retval = boinc_rename("temp", resolved_name.c_str());
+    if (retval) return retval;
 
+    return 0;
+}
 
 
 
@@ -136,17 +146,10 @@ uint64_t checksum_alpha = 0;
 double cpu_time = 20;
 
 int main(int argc, char **argv) {
-    int i;
-    int c, nchars = 0, retval;
+    int retval;
     double fsize;
     char input_path[512], output_path[512], buf[256];
     FILE* infile;
-
-    for (i=0; i<argc; i++) {
-        if (!strcmp(argv[i], "-cpu_time")) {
-            cpu_time = atof(argv[++i]);
-        }
-    }
 
     retval = boinc_init();
     if (retval) {
@@ -177,42 +180,7 @@ int main(int argc, char **argv) {
 
     boinc_resolve_filename(OUTPUT_FILENAME, output_path, sizeof(output_path));
 
-    // open output file
-    retval = out.open(output_path, "wb");
-    if (retval) {
-        fprintf(stderr, "%s APP: upper_case output open failed:\n",
-            boinc_msg_prefix(buf, sizeof(buf))
-        );
-        fprintf(stderr, "%s resolved name %s, retval %d\n",
-            boinc_msg_prefix(buf, sizeof(buf)), output_path, retval
-        );
-        perror("open");
-        exit(1);
-    }
-
-    double start = dtime();
-
-    // main loop - read characters, write
-    //
-    for (i=0; ; i++) {
-        c = fgetc(infile);
-
-        if (c == EOF) break;
-        out._putchar(c);
-        nchars++;
-    }
     boinc_fraction_done(0);
-    out._putchar('\n');
-
-    retval = out.flush();
-    if (retval) {
-        fprintf(stderr, "%s APP: upper_case flush failed %d\n",
-            boinc_msg_prefix(buf, sizeof(buf)), retval
-        );
-        exit(1);
-    }
-
-    double eTime = dtime()-start;
 
 
 
@@ -220,10 +188,19 @@ int main(int argc, char **argv) {
 
 
 
-    /*put your main() code here*/
+
+
+
+
+  /*put your main() code here*/
 
   uint64_t task_id0 = 0;
   uint64_t task_id  = (uint64_t)strtoull(idInput, NULL, 10);
+
+  // checkpoint variables
+  uint64_t checkp = 0;
+  uint64_t countB = 0;    // to count the numbers that need testing in segment of 2^k sieve
+  uint64_t checksum_alpha = 0;
 
   uint64_t maxTaskID = ((uint64_t)1 << (k - TASK_SIZE));
   if ( task_id >= maxTaskID ) {
@@ -233,31 +210,62 @@ int main(int argc, char **argv) {
     exit(-1);
   }
 
-  out.printf("task_id0 = ");
-  fprintf(stderr, "task_id0 = ");
-  print128(task_id0);
-  out.printf("task_id = ");
-  fprintf(stderr, "task_id = ");
-  print128(task_id);
-  out.printf("task_id must be less than ");
-  fprintf(stderr, "task_id must be less than ");
-  print128(maxTaskID);
-  out.printf("TASK_SIZE = ");
-  fprintf(stderr, "TASK_SIZE = ");
-  print128(TASK_SIZE);
-  out.printf("TASK_SIZE0 = ");
-  fprintf(stderr, "TASK_SIZE0 = ");
-  print128(TASK_SIZE0);
-  out.printf("  k = %i\n", k);
-  fprintf(stderr, "  k = %i\n", k);
-  out.printf("  k1 = %i\n", k1);
-  fprintf(stderr, "  k1 = %i\n", k1);
-  out.printf("  k2 = %i\n", k2);
-  fprintf(stderr, "  k2 = %i\n", k2);
-  out.flush();
-  fflush(stderr);
 
 
+  // See if there's a valid checkpoint file.
+  //
+  char chkpt_path[512];
+  FILE* state;
+  boinc_resolve_filename(CHECKPOINT_FILE, chkpt_path, sizeof(chkpt_path));
+  state = boinc_fopen(chkpt_path, "r");
+  if (state) {
+      retval = out.open(output_path, "ab");
+  } else {
+      retval = out.open(output_path, "wb");
+  }
+  if (retval) {
+      fprintf(stderr, "%s APP: output open failed:\n",
+          boinc_msg_prefix(buf, sizeof(buf))
+      );
+      fprintf(stderr, "%s resolved name %s, retval %d\n",
+          boinc_msg_prefix(buf, sizeof(buf)), output_path, retval
+      );
+      perror("open");
+      exit(1);
+  }
+  if (state) {
+      fscanf(state, "%" PRIu64 " %" PRIu64 " %" PRIu64, &checkp, &countB, &checksum_alpha);
+      fclose(state);
+
+      fprintf(stderr, "  restoring from checkpoint: %" PRIu64 " %" PRIu64 " %" PRIu64 "\n", checkp, countB, checksum_alpha);
+      fflush(stderr);
+  } else {
+
+      out.printf("task_id0 = ");
+      fprintf(stderr, "task_id0 = ");
+      print128(task_id0);
+      out.printf("task_id = ");
+      fprintf(stderr, "task_id = ");
+      print128(task_id);
+      out.printf("task_id must be less than ");
+      fprintf(stderr, "task_id must be less than ");
+      print128(maxTaskID);
+      out.printf("TASK_SIZE = ");
+      fprintf(stderr, "TASK_SIZE = ");
+      print128(TASK_SIZE);
+      out.printf("TASK_SIZE0 = ");
+      fprintf(stderr, "TASK_SIZE0 = ");
+      print128(TASK_SIZE0);
+      out.printf("  k = %i\n", k);
+      fprintf(stderr, "  k = %i\n", k);
+      out.printf("  k1 = %i\n", k1);
+      fprintf(stderr, "  k1 = %i\n", k1);
+      out.printf("  k2 = %i\n", k2);
+      fprintf(stderr, "  k2 = %i\n", k2);
+      out.flush();
+      fflush(stderr);
+
+  }
 
 
   const __uint128_t kk = (__uint128_t)1 << k;       // 2^k
@@ -287,7 +295,7 @@ int main(int argc, char **argv) {
 
 
   __uint128_t n, nStart, a;
-  int alpha, aMod, nMod, bMod, j;
+  int aMod, nMod, bMod, j;
 
 
   //const int kkMod = kk % modNum;
@@ -328,8 +336,6 @@ int main(int argc, char **argv) {
 
   __uint128_t bStart = ( (__uint128_t)1 << TASK_SIZE )*task_id;
 
-  __uint128_t countB = 0;    // to count the numbers that need testing in segment of 2^k sieve
-
 
 
 
@@ -339,11 +345,13 @@ int main(int argc, char **argv) {
   FILE* fp;
   size_t file_size;
 
+  // make the following smaller if you want more BOINC checkpoints to occur
+  const uint64_t bufferBytes = (uint64_t)1 << 10;    // 2^1 bytes = 1 kiB
+
   // I will load only a single chunk of 2^k1 sieve into RAM at a time
   char input_path_sieve[512];
   boinc_resolve_filename(file, input_path_sieve, sizeof(input_path_sieve));
   fp = boinc_fopen(input_path_sieve, "rb");
-  const uint64_t bufferBytes = (uint64_t)1 << 13;    // 2^13 bytes = 8 kiB
   uint16_t* data = (uint16_t*)malloc(bufferBytes);
 
   // Check file size
@@ -356,24 +364,26 @@ int main(int argc, char **argv) {
     exit(-1);
   }
 
-  /*
-    Seek to necessary part of the file
-    Note that ((((uint64_t)1 << k1) - 1) & bStart) equals bStart % ((uint64_t)1 << k1)
-  */
-  //rewind(fp);
-  fseek(fp, ((((uint64_t)1 << k1) - 1) & bStart) >> 7, SEEK_SET);
-
   // for handling the buffer...
   uint64_t bufferStepMax = bufferBytes >> 1;   // since each pattern is 2 bytes
   uint64_t bufferStep = bufferStepMax;
   uint16_t bytes;    // the current 2 bytes
+
+  /*
+    Seek to necessary part of the file
+    Note that ((((uint64_t)1 << k1) - 1) & bStart) equals bStart % ((uint64_t)1 << k1)
+  */
+  fseek(fp, ((((uint64_t)1 << k1) - 1) & bStart) >> 7, SEEK_SET);
+  // take care of checkpoint
+  fseek(fp, 2 * checkp, SEEK_CUR);
+
 
 
 
 
 
   ////////////////////////////////////////////////////////////////
-  //////// create arrayk2[] for the 2^k2 sieve
+  //////// create arrayk2[] for the 2^k2 lookup table
   ////////////////////////////////////////////////////////////////
 
 #define min(a,b) (((a)<(b))?(a):(b))
@@ -436,14 +446,27 @@ next:
   uint64_t patternEnd = ((uint64_t)1 << (TASK_SIZE - 8));
   double patternEndDouble = (double)patternEnd;
 
-  for (uint64_t pattern = 0; pattern < patternEnd; pattern++) {
-
-    boinc_fraction_done((double)pattern/patternEndDouble);
+  for (uint64_t pattern = checkp; pattern < patternEnd; pattern++) {
 
     // get bytes
     if (bufferStep >= bufferStepMax) {    // do we need to refresh buffer?
-      fread(data, sizeof(uint16_t), bufferBytes / sizeof(uint16_t), fp);
-      bufferStep = 0;
+
+        // first, do some BOINC stuff
+        boinc_fraction_done((double)pattern/patternEndDouble);
+        if (boinc_time_to_checkpoint()) {
+            retval = do_checkpoint(pattern, countB, checksum_alpha);
+            if (retval) {
+                fprintf(stderr, "%s APP: upper_case checkpoint failed %d\n",
+                    boinc_msg_prefix(buf, sizeof(buf)), retval
+                );
+                exit(retval);
+            }
+            boinc_checkpoint_completed();
+        }
+
+        // read from 2^k1 sieve
+        fread(data, sizeof(uint16_t), bufferBytes / sizeof(uint16_t), fp);
+        bufferStep = 0;
     }
     bytes = data[bufferStep];
     bufferStep++;
