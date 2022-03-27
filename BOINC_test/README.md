@@ -104,7 +104,7 @@ To modify the work generator...
 ```
 gedit ~/boinc-src/sched/sample_work_generator.cpp
 ```
-then change REPLICATION\_FACTOR from 1 to 2, CUSHION from 10 to 10000, wu.delay\_bound from 86400 to 86400\*7, and add the line "wu.canonical\_credit = 1;" (also add the --credit\_from\_wu option to the validator via editing config.xml).
+then change REPLICATION\_FACTOR from 1 to 2, CUSHION from 10 to 10000, wu.delay\_bound from 86400 to 86400\*7, and add the line "wu.canonical\_credit = 1;" (also add the --credit\_from\_wu option to the validator via editing config.xml). Then...
 ```
 cd ~/boinc-src/sched/
 make
@@ -128,7 +128,7 @@ echo hi > in
 ./upper_case -cpu_time 1
 rm out stderr.txt boinc_lockfile boinc_finish_called
 ```
-You can then install a new version via (note that the filename of the executable must be unique, so put the version number inside of it)...
+You can then install a new version via (note that the filename of the new executable must be unique, so put the version number inside of it)...
 ```
 cd ~/projects/awesome/apps/example_app/
 mkdir -p 1.01/x86_64-pc-linux-gnu/
@@ -168,7 +168,7 @@ cat out
 
 I haven't figured out how to get things to compile on Windows.
 
-See my **upper\_case\_template.cpp** here in my GitHub for how to easily modify BOINC's original upper\_case.cpp. Just put global code where is says to, then put the main() code where it says to.
+See my **upper\_case\_template.cpp** here in my GitHub for how to easily modify BOINC's original upper\_case.cpp. Just put your global code where is says to, then put the main() code where it says to.
 
 
 
@@ -231,7 +231,7 @@ cd ~/projects/awesome/tmp_pinkslime
 echo 0 > taskID.txt
 ```
 
-I want to use the "repeated k steps" algorithm, so use
+I want to use the "repeated k steps" algorithm, so I'd use the code
 ```
 partiallySieveless/collatzPartiallySieveless_repeatedKsteps.c
 ```
@@ -322,7 +322,7 @@ Copy upper\_case to this folder, renaming it to example\_app\_103\_x86\_64-pc-li
 </version>
 ```
 
-The sieve37 file will not have to be downloaded to the client for each task (just the client's first task). However, if on my client I set "no new tasks" and let all tasks finish, sieve37 would be deleted on my client's computer (the sieve is also deleted if the server runs out of tasks to send and my client has finished running of all of its tasks). Is there a way to keep the sieve37 file on the client's computer until the BOINC application is updated?
+The sieve37 file will not have to be downloaded to the client for each task (just the client's first task). However, if on my client I set "no new tasks" and let all tasks finish, sieve37 would be deleted on my client's computer (the sieve is also deleted if the server runs out of tasks to send and my client has finished running of all of its tasks). Is there a way to keep the sieve37 file on the client's computer (until the BOINC application is updated)?
 
 Then, do the usual to create the new version...
 ```
@@ -333,20 +333,22 @@ cp ~/boinc-src/sched/sample_work_generator ~/projects/awesome/bin/
 bin/start
 ```
 
-As the project runs, check the files in the sample\_results folder (use grep). If there is 128-bit integer overflow, this could be a number that disproves the Collatz conjecture! Much more likely, it is a very rare instance of the number getting too large before it finds its way to lower than where it started. You can use my collatzTestOverflow.py file to check numbers that overflow. My C code carefully checks if overflow will happen, then prints whenever overflow will occur so that you know to run this script.
+As the project runs, carefully check the files in the sample\_results folder (use grep). If there is 128-bit integer overflow, this could be a number that disproves the Collatz conjecture! Much more likely, it is a very rare instance of the number getting too large before it finds its way to lower than where it started. You can use my collatzTestOverflow.py file to check numbers that overflow. My C code carefully checks if overflow will happen, then prints whenever overflow will occur so that you know to run this script.
 
 If the CPU-only code never completes, you may have found an infinite cycle that disproves the Collatz conjecture!
-Further analysis would be required if this occurs.  
+Further analysis would be required if this occurs. You should carefully search for this!  
 To find these, you may need to go to the "awesome\_ops" webpage, then go to Results, then you can search for in-progress tasks sorted by send-time.
 
 It is very important that tasks are not skipped, so find the oldest not-yet-returned workunit (as described above), then make sure all tasks have successfully returned between the last time you checked up to the oldest not-yet-returned workunit.  
-Not wanting to skip tasks is why I require validation (due to things like most people not having ECC memory).
+Not wanting to skip tasks is why I also require that tasks validate against another computer (due to things like most people not having ECC memory).
 
 To remove old tasks from the database server, run db\_purge...  
 [https://boinc.berkeley.edu/trac/wiki/DbPurge](https://boinc.berkeley.edu/trac/wiki/DbPurge)
 ```
-./bin/db_purge --min_age_days 7 --one_pass
+bin/db_purge --min_age_days 7 --one_pass
 ```
+or, better yet, run it as a daemon.
+
 More info about the database...  
 [https://boinc.berkeley.edu/trac/wiki/DataBase](https://boinc.berkeley.edu/trac/wiki/DataBase)  
 [https://boinc.berkeley.edu/trac/wiki/MysqlConfig](https://boinc.berkeley.edu/trac/wiki/MysqlConfig)
@@ -386,21 +388,21 @@ When setting these parameters, keep in mind that...
 [https://boinc.berkeley.edu/trac/wiki/CreditOptions](https://boinc.berkeley.edu/trac/wiki/CreditOptions)  
 [https://boinc.berkeley.edu/wiki/Computation_credit](https://boinc.berkeley.edu/wiki/Computation_credit)
 
-After choosing your parameters, you might want to add code to the work generator that prevents taskID from getting too large. If a taskID that is too large is about to be used, exit(1) should be called.
+After choosing your parameters, you might want to add code to the work generator that prevents taskID from getting too large. If a taskID that is too large is about to be used, something like exit(1) should be called.
 
 
 
 
-## things you'd have to do to get GPU code to work
+## things you'd have to do to get the GPU code to work in BOINC
 
-For GPU, look in the partiallySieveless\_nonNvidiaGPU folder for the following files...
+For the GPU code, look in the partiallySieveless\_nonNvidiaGPU folder for the following files...
 * collatzPartiallySieveless\_repeatedKsteps\_GPU\_nonNvidia.c
 * kern1\_128byHand\_nonNvidia.cl
 * kern1\_2\_repeatedKsteps\_nonNvidia.cl
-* kern2\_repeatedKsteps\_128byHand\_nonNvidia.cl
+* kern2\_repeatedKsteps\_128byHand\_nonNvidia.cl  
 Even though these say "nonNvidia", they still work on Nvidia.
 
-Unlike the CPU-only code, there are time-limits and step-limits (due to watchdog timers). So, if an infinite cycle exists that disproves the conjecture, you have to check for limits being reached.
+Unlike the CPU-only code, there are time-limits and step-limits (due to watchdog timers). So, to check if an infinite cycle exists that disproves the conjecture, you have to check for limits being reached.
 
 Set CHUNKS\_KERNEL2 to prevent the 4.5-second time limit from being reached, while being large enough to allow significant GPU computation. Perhaps change the code to let users set CHUNKS\_KERNEL2 and secondsKernel2 in some config file.
 
