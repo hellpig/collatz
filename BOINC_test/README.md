@@ -286,7 +286,7 @@ boinc_fraction_done((double)pattern / patternEndDouble);
 ```
 * Because my code was C and I'm now compiling it as C++ for BOINC, I had to make a few minor changes to the part of the code that makes the 2^k2 lookup table.
 
-* I made many changes to allow for checkpoints within the BOINC client. A couple of the less obvious things that I added to the code to allow for checkpoints were "#include \<cinttypes\>" and seeking the sieve file to the new location. Reduce the value of *bufferBytes* to increase the rate of checkpoints. When testing this out, keep in mind that the BOINC client has a computing setting that prevents checkpoints from being saved faster than a set frequency.
+* Using the code in BOINC's *original* upper_case.cpp as a guide, I made many changes to allow for checkpoints within the BOINC client. A couple of the less obvious things that I added to the code to allow for checkpoints were "#include \<cinttypes\>" and seeking the sieve file to the new location. If you'd like, you can reduce the value of *bufferBytes* to increase the rate of checkpoint attempts. When testing this out, keep in mind that the BOINC client has a computing setting that prevents checkpoints from being saved faster than a set frequency, so not every checkpoint attempt will result in a checkpoint.
 
 &nbsp;  
 &nbsp;  
