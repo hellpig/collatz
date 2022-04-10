@@ -5,7 +5,7 @@ Here are my efforts to make a BOINC server that runs my Collatz code. The follow
 Instructions for installing BOINC server...  
 [https://boinc.berkeley.edu/trac/wiki/ServerIntro](https://boinc.berkeley.edu/trac/wiki/ServerIntro)
 
-I don't want to use any of the bundled BOINC installers because I'm not convinced that they are maintained or documented correctly, and you end up spending the same amount of time learning about all of their bundling stuff like Docker or whatever. Because they preconfigure everything, you eventually have to change all the settings to how you want them, so just do it the right way (from scratch) from the beginning.
+I don't want to use any of the bundled BOINC installers because I'm not convinced that they are maintained or documented correctly, and you end up spending the same amount of time learning about all of their bundling stuff like Docker or whatever and trying to overcome their limitations. You eventually will want to change all the settings to how you want them, so just do it the right way (from scratch) from the beginning.
 
 I do want to use example\_app provided by BOINC! I will simply modify it.  
 [https://boinc.berkeley.edu/trac/wiki/ExampleApps](https://boinc.berkeley.edu/trac/wiki/ExampleApps)
@@ -393,10 +393,11 @@ Set the parameters in the code in this order...
 This value must agree between CPU-only and GPU code. It can always be increased a year or so in the future after this TASK\_SIZE\_KERNEL2 (for CPU-only, TASK\_SIZE0) has completed. If you set this too big, it will take decades for TASK\_SIZE\_KERNEL2 (or TASK_SIZE0) to finish.
 1. Then choose k (not the k1 you already chose when saving the sieve) to optimize speed.  
 This value must agree between CPU-only and GPU code. It can always be increased a year or so in the future after this TASK\_SIZE\_KERNEL2 (for CPU-only, TASK\_SIZE0) has completed.
-1. Then choose TASK\_SIZE large enough to give enough to each GPU process (more than 10 for sure), but not too high to cause too much RAM usage (a concern for GPU code only). You can choose a larger TASK\_SIZE for GPU code compared to CPU-only codes, but then you'll have to do some thinking in BOINC's work generator in order to fit the smaller CPU-only tasks around the GPU tasks to make sure all numbers are tested. Do the CPU-only and GPU codes need to be different platforms in the same application for BOINC work generator to allow them to coordinate?
+1. Then choose TASK\_SIZE large enough to give enough to each GPU process (more than 10 for sure), but not too high to cause too much RAM usage (a concern for GPU code only). You can choose a different TASK\_SIZE for GPU code compared to CPU-only codes, but then you'll have to do some thinking in BOINC's work generator in order to fit the smaller tasks around the larger tasks to make sure all numbers are tested. Do the CPU-only and GPU codes need to be different platforms in the same application for BOINC work generator to allow them to coordinate?
 
 When setting these parameters, keep in mind that...
-* For GPU code, frequent suspension of BOINC (that is going back to most recent checkpoint) requires the part of the sieve of length 2^TASK\_SIZE to be recalculated, and you could lose amount of work proportional to 2^(TASK\_SIZE\_KERNEL2 - k)
+* For GPU code, frequent suspension of BOINC (that is going back to most recent checkpoint) requires the part of the sieve of length 2^TASK\_SIZE to be recalculated, and, if kernel2 isn't allowed to finish, you could lose amount of work proportional to 2^(TASK\_SIZE\_KERNEL2 - k)
+* For GPU code, kernel1 must finish in time if there is a watchdog timer (else there is an error). Time needed to run kernel1 is proportional to 2^TASK\_SIZE
 * You want each task to do the most work possible to prevent the BOINC server from having to work very hard dealing with many tasks.
 * Change the amount of credit that the task gets to match. Don't give an unfair amount, else the people who want credit will volunteer at your project instead of at a project that cures diseases.  
 [https://boinc.berkeley.edu/trac/wiki/CreditOptions](https://boinc.berkeley.edu/trac/wiki/CreditOptions)  
@@ -417,7 +418,7 @@ For the GPU code, look in the partiallySieveless\_nonNvidiaGPU folder for the fo
 
 Unlike the CPU-only code, there are time-limits and step-limits (due to watchdog timers). So, to check if an infinite cycle exists that disproves the conjecture, you have to check for limits being reached.
 
-Set CHUNKS\_KERNEL2 to prevent the 4.5-second time limit from being reached, while being large enough to allow significant GPU computation. Perhaps change the code to let users set CHUNKS\_KERNEL2 and secondsKernel2 in some config file.
+Set CHUNKS\_KERNEL2 large enough to prevent the 4.5-second time limit from being reached, while being small enough to allow significant GPU computation per chunk. Perhaps change the code to let users set CHUNKS\_KERNEL2 and secondsKernel2 via some config file or via the project's preferences webpage. While you're at it, TASK_UNITS, which controls the number of threads to make to accomplish kernel1 and kernel1_2, can be set by the user.
 
 The GPU code uses 2^TASK\_SIZE bytes of RAM. The CPU-only code uses essentially no RAM.
 
