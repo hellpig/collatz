@@ -334,7 +334,7 @@ Copy upper\_case to this folder, renaming it to example\_app\_103\_x86\_64-pc-li
 </version>
 ```
 
-The sieve37 file will not have to be downloaded to the client for each task (just the client's first task). However, if on my client I set "no new tasks" and let all tasks finish, sieve37 would be deleted on my client's computer (the sieve is also deleted if the server runs out of tasks to send and my client has finished running of all of its tasks). Is there a way to keep the sieve37 file on the client's computer (until the BOINC application is updated)?
+The sieve37 file will not have to be downloaded to the client for each task (just the client's first task). However, if on my client I set "no new tasks" and let all tasks finish, sieve37 would be deleted on my client's computer (the sieve is also deleted if the server runs out of tasks to send and my client has finished running of all of its tasks). Is there a way to keep the sieve37 file on the client's computer (until the BOINC application is updated)? There must be because the cosmology@home project keeps its files on my client!
 
 Then, do the usual to create the new version...
 ```
@@ -378,6 +378,8 @@ More info about the database...
 ## things you'd have to do if making a public BOINC server
 
 Currently, if 128-bit overflow is detected in the CPU-only code, the code immediately prints to the *out* file. However, if the code resets back to a checkpoint before the next checkpoint is saved, I believe that the 128-bit-overflow message is printed again. The *out* files of different computers doing the same task will now differ and they will not validate. This should be EXTREMELY rare, but, if you want, there are many ways to fix this: (1) save 128-bit-overflow messages to a string that is only saved to *out* when writing a checkpoint, (2) when printing the 128-bit-overflow message scan *out* to see if it already exists, or (3) edit the validator. I feel like the best fix is to edit the validator to be more resilient.
+
+The work generator code would probably need the correct estimated number of "floating point operations" per task. I only guess that this might be necessary, but it probably doesn't matter if all tasks from the project give the same credit (set via canonical_credit in work generator code). Since there aren't really any floating-point operations in Collatz (integer) code, I guess try to give an equivalent value based on runtime?
 
 Perhaps add some amount to *aStart* manually (GPU code requires you to add to both change h\_minimum and h\_supremum) to match current experimental progress in published academic papers (that is, ignore the "progress" from Jon Sonntag's BOINC project). The CPU-only and GPU codes must have identical settings, and this setting cannot be changed until TASK\_SIZE0 (for GPU, TASK\_SIZE\_KERNEL2) has completed. If you do this, be sure to fix the "aMod = 0" line!
 
