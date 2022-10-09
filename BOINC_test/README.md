@@ -96,7 +96,7 @@ When restarting your server, the BOINC server works even before you log into the
 
 ## getting new versions of example\_app installed
 
-I edited the projects config.xml file...
+I edited the project's config.xml file...
 * one\_result\_per\_user\_per\_wu changed to 1
 * enable\_delete\_account changed to 1
 
@@ -255,13 +255,12 @@ to be global (above *my* global stuff) so that functions can use it.
   fprintf(stderr, "whatever");  
 so that users can see task results via BOINC project's webpage! You'll often want to flush this using  
   fflush(stderr);
-* For the inputs to the code, I no longer use command options. Note that templates/example\_app\_in defines the command line options such as cpu\_time. Instead, I hardcoded task\_id0 to 0 (it only needs to be changed every couple years), and edited the work generator to have a number on the first line of the in file, which would become task\_id. In upper\_case.cpp, I added...
+* For the inputs to the code, I no longer use command options. Note that templates/example\_app\_in defines the command line options such as cpu\_time. Instead, I hardcoded task\_id0 to 0 (it only needs to be changed every couple years), and edited the work generator to have a number on the first line of the in file, which would become task\_id. In upper\_case.cpp, I added the following so that idInput could be used for setting task\_id....
 ```
 char idInput[25];
 fscanf(infile, "%s", idInput);
 rewind(infile);
 ```
-so that idInput could be used for setting task\_id.
 * So that the sieve file could be loaded, I changed  
   fp = fopen(file, "rb");  
 to  
