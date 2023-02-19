@@ -333,7 +333,8 @@ Copy upper\_case to this folder, renaming it to example\_app\_103\_x86\_64-pc-li
 </version>
 ```
 
-The sieve37 file will not have to be downloaded to the client for each task (just the client's first task). However, if on my client I set "no new tasks" and let all tasks finish, sieve37 would be deleted on my client's computer (the sieve is also deleted if the server runs out of tasks to send and my client has finished running of all of its tasks). Is there a way to keep the sieve37 file on the client's computer (until the BOINC application is updated)? There must be because the cosmology@home project keeps its files on my client!
+The sieve37 file will not have to be downloaded to the client for each task (just the client's first task). However, if on my client I set "no new tasks" and let all tasks finish, sieve37 would be deleted on my client's computer (the sieve is also deleted if the server runs out of tasks to send and my client has finished running of all of its tasks). Is there a way to keep the sieve37 file on the client's computer (until the BOINC application is updated)? There must be because the cosmology@home project keeps its files on my client! Perhaps the *sticky* flag described at the following link can help?  
+[https://boinc.berkeley.edu/trac/wiki/BoincFiles](https://boinc.berkeley.edu/trac/wiki/BoincFiles)
 
 Then, do the usual to create the new version...
 ```
@@ -346,14 +347,14 @@ bin/start
 
 As the project runs, carefully check the files in the sample\_results folder (use grep). If there is 128-bit integer overflow, this could be a number that disproves the Collatz conjecture! Much more likely, it is a very rare instance of the number getting too large before it finds its way to lower than where it started. You can use my collatzTestOverflow.py file to check numbers that overflow. My C code carefully checks if overflow will happen, then prints whenever overflow will occur so that you know to run this script.  
 Ideally, your BOINC assimilator would be programmed to do this...  
-https://boinc.berkeley.edu/trac/wiki/AssimilateIntro
+[https://boinc.berkeley.edu/trac/wiki/AssimilateIntro]([https://boinc.berkeley.edu/trac/wiki/AssimilateIntro)
 
 If the CPU-only code never completes, you may have found an infinite cycle that disproves the Collatz conjecture!
 Further analysis would be required if this occurs. Even though it seems unlikely that a cycle would not overflow 128-bit integers (due to the minimum cycle length being over 17 million steps), you should carefully search for this!  
 To find these, you could go to the "awesome\_ops" webpage, then go to Results, then you can search for in-progress tasks sorted by send-time.  
 Also, look through the *errors* file (made by the assimilator in sample_results/ folder).  
 You could speed up this process via...  
-https://boinc.berkeley.edu/trac/wiki/ProjectOptions#Acceleratingretries
+[https://boinc.berkeley.edu/trac/wiki/ProjectOptions#Acceleratingretries](https://boinc.berkeley.edu/trac/wiki/ProjectOptions#Acceleratingretries)
 
 It is very important that tasks are not skipped, so find the oldest not-yet-returned workunit (as described above), then make sure all tasks have successfully returned between the last time you checked up to the oldest not-yet-returned workunit.  
 Ideally, your assimilator would make a list of completed task\_IDs, where, in an *initial* consecutive group, all but the final task\_ID can be deleted from the list.  
@@ -434,7 +435,9 @@ Is there a way to check if the user has enough GPU RAM before running the code?
 
 Read through what I did to make the CPU-only code BOINC-ready, and do similar things to the GPU code.
 
-If some non-Nvidia GPUs are giving math errors and are not validating, stop using them immediately. You could then use my CUDA code, but getting it to compile on Windows was tricky due to the CUDA and Windows combination not playing nicely with gcc (I've done it once and have some notes on my computer). I'd just use the OpenCL code in the partiallySieveless folder (and put up with the CPU busy waiting if printf() in kernel2). However, if there are watchdog timers or you want to implement checkpoints, you're back to using the partiallySieveless\_nonNvidiaGPU code.
+If some non-Nvidia GPUs are giving math errors and are not validating, perhaps stop using non-Nvidia GPUs immediately. You could then use my CUDA code, but getting it to compile on Windows was tricky due to the CUDA and Windows combination not playing nicely with gcc (I've done it once and have some notes on my computer). I'd just use the OpenCL code in the partiallySieveless folder (and put up with the CPU busy waiting if printf() in kernel2). However, if there are watchdog timers or you want to implement checkpoints, you're back to using the partiallySieveless\_nonNvidiaGPU code.
+
+As for whether or not to make a separate BOINC application for GPU, putting CPU-only and GPU together in the same application might help with not making the client download two copies of the sieve. As for validation, if TASK\_SIZE is different for CPU-only and GPU codes, you would probably want to validate them against their same type, which might not be possible if CPU-only and GPU are in the same application.
 
 First, look at boinc-src/samples/nvcuda/ and  
 [https://boinc.berkeley.edu/trac/wiki/GPUApp](https://boinc.berkeley.edu/trac/wiki/GPUApp)  
