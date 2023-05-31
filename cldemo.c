@@ -1,6 +1,6 @@
 /*
 
-Prints out platform and device info.
+Prints out OpenCL platform and device info.
 
 Then, it doubles all integers from 0 to 99
 
@@ -80,6 +80,7 @@ int main(int argc, char **argv)
 	cl_device_id devices[100];
 	cl_uint devices_n = 0;
 	// CL_CHECK(clGetDeviceIDs(NULL, CL_DEVICE_TYPE_ALL, 100, devices, &devices_n));
+        //   change the 0 to view devices on another platform (Brad K.)
 	CL_CHECK(clGetDeviceIDs(platforms[0], CL_DEVICE_TYPE_GPU, 100, devices, &devices_n));
 
 	printf("=== %d OpenCL device(s) found on platform:\n", devices_n);
