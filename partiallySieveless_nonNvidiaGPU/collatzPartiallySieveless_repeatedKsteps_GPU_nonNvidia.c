@@ -130,7 +130,7 @@ const int k2 = 18;
 
 
 /*
-  For kernel1 and kernel1_2, which make the lookup table...
+  For kernel1 and kernel1_2, which make the sieve and lookup table...
     TASK_UNITS + 8 <= TASK_SIZE <= k
     TASK_UNITS <= k2
   Will use more than 2^TASK_SIZE bytes of RAM
