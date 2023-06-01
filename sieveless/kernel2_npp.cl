@@ -4,7 +4,7 @@ typedef unsigned __int128 uint128_t;
 
 #define UINT128_MAX (~(uint128_t)0)
 
-uint pow3(size_t n)
+uint pow3(size_t n)   // returns 3^n
 {
 	uint r = 1;
 	uint b = 3;
@@ -28,6 +28,13 @@ __kernel void worker(
 	__global ulong *indices,         // has a much shorter length than the rest of the arrays
 	__global ulong *arrayLarge,      // actually 128-bit integers
 	__global uchar *arrayIncreases
+
+/*
+  index = indices[get_global_id(0)] is the only time indices[] will be used
+  Only arrayLarge[index*2] and arrayLarge[index*2 + 1] will be used
+  Only arrayIncreases[index] will be used
+*/
+
 )
 {
 	size_t id = get_global_id(0);
@@ -38,7 +45,7 @@ __kernel void worker(
 	if (get_local_id(0) == 0) {
 		for (size_t i = 0; i < LUT_SIZE32; ++i) {
 			lut[i] = pow3(i);
-			//maxNs[i] = UINT128_MAX / lut[i];
+			//maxNs[i] = UINT128_MAX / lut[i];    // division does not compile
 		}
 		maxNs[0]  = ((uint128_t) 18446744073709551615 << 64) | 18446744073709551615;
 		maxNs[1]  = ((uint128_t) 6148914691236517205 << 64) | 6148914691236517205;
@@ -74,7 +81,7 @@ __kernel void worker(
 
 
 	size_t index = indices[id];
-	if (index == 0) return;
+	if (index == 0) return;   // arrayLarge[0], arrayLarge[1], and arrayIncreases[0] are 0; this does not need to be checked
 
 	uint128_t L0 = ((uint128_t)TASK_ID << TASK_SIZE) + index;
 

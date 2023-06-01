@@ -110,7 +110,7 @@ const int k = 51;
   My CPU-only code prefers a smaller TASK_SIZE so that the task finishes in a reasonable time
 */
 const int TASK_SIZE = 24;
-const int TASK_UNITS = 16;
+const int TASK_UNITS = 16;   // for OpenCL, global_work_size = 2^TASK_UNITS
 
 
 
