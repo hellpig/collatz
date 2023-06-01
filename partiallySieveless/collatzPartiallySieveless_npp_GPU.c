@@ -73,6 +73,7 @@ calculate the following using Python 3, then put it as your TASK_ID_KERNEL2...
 Then set the following as your TASK_ID...
   remainder = (55247846101001863167 % (9 << TASK_SIZE_KERNEL2))
   TASK_ID = (remainder % (1 << k)) // (1 << TASK_SIZE)
+where I am using a double slash, //, for integer division.
 
 
 
@@ -112,7 +113,7 @@ const int k = 51;
   My CPU-only code prefers a smaller TASK_SIZE so that the task finishes in a reasonable time
 */
 const int TASK_SIZE = 24;
-const int TASK_UNITS = 16;
+const int TASK_UNITS = 16;   // for OpenCL, global_work_size = 2^TASK_UNITS
 
 
 

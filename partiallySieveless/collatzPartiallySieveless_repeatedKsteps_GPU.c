@@ -76,6 +76,7 @@ calculate the following using Python 3, then put it as your TASK_ID_KERNEL2...
 Then set the following as your TASK_ID...
   remainder = (274133054632352106267 % (9 << TASK_SIZE_KERNEL2))
   TASK_ID = (remainder % (1 << k)) // (1 << TASK_SIZE)
+where I am using a double slash, //, for integer division.
 
 
 (c) 2021 Bradley Knockel
@@ -103,8 +104,8 @@ const int k = 51;
 
 
 /*
-  For a 2^k2 sieve to do k2 steps at a time after the initial k steps
-  3 < k2 < 37
+  For a 2^k2 lookup table to do k2 steps at a time after the initial k steps
+  3 < k2 < 37, where k2 < 37 so that table fits in uint64_t
   Will use more than 2^(k2 + 3) bytes of RAM
   For my GPU, 18 is the best because it fits in GPU cache
 */
@@ -113,7 +114,7 @@ const int k2 = 18;
 
 
 /*
-  For kernel1 and kernel1_2, which make the sieves...
+  For kernel1 and kernel1_2, which make the sieve and lookup table...
     TASK_UNITS + 8 <= TASK_SIZE <= k
     TASK_UNITS <= k2
   Will use more than 2^TASK_SIZE bytes of RAM
@@ -122,7 +123,7 @@ const int k2 = 18;
   (fraction of 2^k sieve not excluded) * 2^TASK_SIZE should be much larger than the number of CUDA Cores you have
 */
 const int TASK_SIZE = 24;
-const int TASK_UNITS = 16;
+const int TASK_UNITS = 16;   // for OpenCL, global_work_size = 2^TASK_UNITS
 
 
 
@@ -159,7 +160,7 @@ const char file[10] = "sieve37";
 // set kernel files
 static const char *kernel1   = "kern1.cl";                  // for k1
 static const char *kernel1_2 = "kern1_2_repeatedKsteps.cl"; // for k2
-static const char *kernel2   = "kern2_repeatedKsteps.cl";   // for actually using sieves
+static const char *kernel2   = "kern2_repeatedKsteps.cl";   // for actually using sieve and lookup table
 //static const char *kernel1   = "kern1_128byHand.cl";
 //static const char *kernel2   = "kern2_repeatedKsteps_128byHand.cl";
 

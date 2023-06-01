@@ -68,6 +68,7 @@ calculate the following using Python 3, then put it as your TASK_ID_KERNEL2...
 Then set the following as your TASK_ID...
   remainder = (274133054632352106267 % (9 << TASK_SIZE_KERNEL2))
   TASK_ID = (remainder % (1 << k)) // (1 << TASK_SIZE)
+where I am using a double slash, //, for integer division.
 
 
 (c) 2021 Bradley Knockel
@@ -94,8 +95,8 @@ const int k = SIEVE_LOGSIZE;
 
 
 /*
-  For a 2^k2 sieve to do k2 steps at a time after the initial k steps
-  3 < k2 < 37
+  For a 2^k2 lookup table to do k2 steps at a time after the initial k steps
+  3 < k2 < 37, where k2 < 37 so that table fits in uint64_t
   Will use more than 2^(k2 + 3) bytes of RAM
   For my GPU, 18 is the best because it fits in GPU cache
 */
@@ -106,7 +107,7 @@ const int k2 = SIEVE_LOGSIZE2;
 
 
 /*
-  For kernel1 and kernel1_2, which make the sieves...
+  For kernel1 and kernel1_2, which make the sieve and lookup table...
     TASK_UNITS + 8 <= TASK_SIZE <= k
     TASK_UNITS <= k2
   Will use more than 2^TASK_SIZE bytes of RAM
@@ -169,7 +170,7 @@ const char file[10] = "sieve37";
 
 #define UINT128_MAX (~(uint128_t)0)
 
-__device__ uint32_t pow3(size_t n)
+__device__ uint32_t pow3(size_t n)   // returns 3^n
 {
 	uint32_t r = 1;
 	uint32_t b = 3;
@@ -247,7 +248,7 @@ __global__ void kernel1(
 		uint128_t L0 = ((uint128_t)TASK_ID << TASK_SIZE) + (pattern * 256 + sieve8[bit]);
 
 		uint128_t L = L0;
-		uint32_t Salpha = 0;      /* sum of alpha */
+		uint32_t Salpha = 0;  /* sum of alpha, which are the number of increases */
 
 		uint128_t nextL = L0 - 1;
 		uint32_t nextSalpha = 0;
@@ -362,7 +363,7 @@ next3:
 
 
 /*
-  kernel1_2 makes k2 sieve
+  kernel1_2 makes k2 lookup table
 */
 
 
@@ -394,7 +395,7 @@ __global__ void kernel1_2(
 
 		int R = SIEVE_LOGSIZE2;  /* counter */
 
-		uint32_t Salpha = 0; /* sum of alpha */
+		uint32_t Salpha = 0; /* sum of alpha, which are the number of increases */
 
 		if (L == 0) goto next;
 
@@ -444,7 +445,7 @@ next:
 
 
 /*
-  kernel2 uses the sieves
+  kernel2 uses the sieve and lookup table
 */
 
 __global__ void kernel2(
@@ -454,6 +455,13 @@ __global__ void kernel2(
 	uint64_t *arrayLarge2,
 	uint64_t TASK_ID,
 	uint64_t TASK_ID_KERNEL2
+
+/*
+  index = indices[id] is the only time indices[] will be used
+  Only arrayLarge[index*2] and arrayLarge[index*2 + 1] will be used
+  Only arrayIncreases[index] will be used
+*/
+
 )
 {
 	size_t id = (size_t)blockIdx.x * (size_t)blockDim.x + (size_t)threadIdx.x;
