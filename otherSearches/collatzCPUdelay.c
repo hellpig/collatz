@@ -4,7 +4,8 @@ Find a rolling average of the "delay" as defined here
   http://www.ericr.nl/wondrous/index.html#part3
 Except I define (3*n + 1)/2 as a single step,
   though 4 lines can be uncommented or switched to make it 2 steps.
-I will average the delays in each consecutive 2^k block of numbers
+I will average the delays in each consecutive 2^k block of numbers,
+  so it isn't a true rolling average.
 
 
 

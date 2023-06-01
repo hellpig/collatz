@@ -4,7 +4,8 @@ Find a rolling average of the "glide" as defined here
   http://www.ericr.nl/wondrous/index.html#part2
 Except I define a step as a bit shift as defined here
   https://rdcu.be/b5nn1
-I will average the glides in each consecutive 2^k block of numbers
+I will average the glides in each consecutive 2^k block of numbers,
+  so it isn't a true rolling average.
 
 
 

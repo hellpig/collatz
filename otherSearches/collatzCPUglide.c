@@ -4,7 +4,8 @@ Find a rolling average of the "glide" as defined here
   http://www.ericr.nl/wondrous/index.html#part2
 Except I define (3*n + 1)/2 as a single step,
   though uncomment a couple lines of code to call it 2 steps.
-I will average the glides in each consecutive 2^k block of numbers
+I will average the glides in each consecutive 2^k block of numbers,
+  so it isn't a true rolling average.
 
 
 
