@@ -1,7 +1,7 @@
 
 
 
-uint pow3(size_t n)
+uint pow3(size_t n)   // returns 3^n
 {
 	uint r = 1;
 	uint b = 3;
@@ -174,7 +174,7 @@ __kernel void worker(
 
 		struct uint128_t L = L0;
 
-		int Salpha = 0;      /* sum of alpha */
+		int Salpha = 0;    /* sum of alpha, which are the number of increases */
 
 		struct uint128_t nextL = sub(L0, 1);
 		int nextSalpha = 0;

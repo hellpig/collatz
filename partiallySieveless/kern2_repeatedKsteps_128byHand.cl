@@ -1,7 +1,7 @@
 
 
 
-ulong pow3(size_t n)
+ulong pow3(size_t n)   // returns 3^n
 {
 	ulong r = 1;
 	ulong b = 3;
@@ -149,10 +149,10 @@ static inline struct uint128_t add128( struct uint128_t a, struct uint128_t b){
 
 
 __kernel void worker(
-	__global ulong *indices,
-	__global ulong *arrayLarge,      // actually 128-bit integers
-	__global uchar *arrayIncreases,
-	__global ulong *arrayLarge2
+	__global ulong *indices,        // index = indices[get_global_id(0)] is the only time this array will be used
+	__global ulong *arrayLarge,      // actually 128-bit integers; only arrayLarge[index*2] and arrayLarge[index*2 + 1] will be used
+	__global uchar *arrayIncreases,  // for 2^k sieve; only arrayIncreases[index] will be used
+	__global ulong *arrayLarge2     // 2^k2 table: final value AND increases
 )
 {
 	size_t id = get_global_id(0);
@@ -163,7 +163,7 @@ __kernel void worker(
 	if (get_local_id(0) == 0) {
 		for (size_t i = 0; i < SIEVE_LOGSIZE2 + 1; ++i) {
 			lut[i] = pow3(i);
-			//maxNs[i] = UINT128_MAX / lut[i];
+			//maxNs[i] = UINT128_MAX / lut[i];    // division does not compile
 		}
 		maxNs[0].hi = 18446744073709551615;
 		maxNs[0].lo = 18446744073709551615;
