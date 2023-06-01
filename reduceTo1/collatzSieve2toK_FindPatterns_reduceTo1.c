@@ -1,7 +1,7 @@
 /* ******************************************
 
 Find deltaN and count numbers to be tested for a 2^k sieve
-  that is to me used to find maximum number of steps to 1.
+  that is to be used to find maximum number of steps to 1.
 For n = A 2^k + B, A>0 must be true when using this sieve.
 
 Compile and run via something like...
@@ -115,7 +115,7 @@ void print128(__uint128_t n) {
 
 
 
-uint32_t pow3(size_t n)
+uint32_t pow3(size_t n)   // returns 3^n
 {
 	uint32_t r = 1;
 	uint32_t b = 3;
@@ -324,11 +324,15 @@ int main(void) {
   uint32_t *collectMaxM = malloc(sizeof(uint32_t) * patternsPerArray);
 
 
+
+
   // run task_id in groups and save after each group
-  for (uint64_t task_id_group = loadCheckpoint; task_id_group < taskGroups; task_id_group++) {
+  for (uint64_t task_id_group = loadCheckpoint; task_id_group < taskGroups; task_id_group++)
+  {
 
   // loop over task_id to repeatedly call kSteps() and analyze results
-  for (uint64_t task_id = task_id_group * tasksPerSave; task_id < (task_id_group + 1) * tasksPerSave; task_id++) {
+  for (uint64_t task_id = task_id_group * tasksPerSave; task_id < (task_id_group + 1) * tasksPerSave; task_id++)
+  {
 
 
 
