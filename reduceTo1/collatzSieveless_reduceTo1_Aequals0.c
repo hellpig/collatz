@@ -81,14 +81,6 @@ I do lots of bitwise operations in this code!
 
 
 
-For this paragraph, I will use a double slash, //, for integer division.
-  (3*n+1) / 2 = 3*(n//2) + 2
-since n//2 = (n-1)/2 since n is odd.
-It is better to use 3*(n//2) + 2 because you calculate n//2 THEN multiply by 3
-allowing n to be twice as large without causing an overflow.
-This is a minor improvement worth doing!
-(Though David Barina's algorithm no longer requires this calculation!)
-
 
 
 If overflow is reached, you may have found a number that
@@ -102,6 +94,11 @@ If the code reaches the step limit,
 
 This code requires an argument...
   ./a.out task_id
+
+Starting at 0, increase task_id by 1 each run.
+The first number to be run is...
+  2^TASK_SIZE * task_id
+and 2^TASK_SIZE numbers will be run.
 
 Here is a neat way to run this code...
   seq -f %1.0f 0 7 | parallel -P 2 ./a.out |tee -a log.txt &
@@ -117,7 +114,7 @@ Change the -P argument of parallel to run more CPU threads at a time!
 This number is over 64-bits, so it cannot be made into an integer literal.
 To test 128-bit overflow...
   task_id = 274133054632352106267 // (1 << TASK_SIZE)
-
+where I am using a double slash, //, for integer division.
 
 
 
@@ -147,7 +144,7 @@ const int TASK_SIZE = 33;
 
 /*
   2^k2 is lookup table size for doing k2 steps at once
-  k2 < 37
+  k2 < 37 so that the table fits in uint64_t
 */
 const int k2 = 15;
 
@@ -159,7 +156,7 @@ const int k2 = 15;
   Where to start the search for max steps.
   Put your old result here
 */
-int stepsMax = 762;
+int stepsMax = 762;   // after running up to 2^36
 
 
 
@@ -254,7 +251,7 @@ int main(int argc, char *argv[]) {
   for (size_t index = 0; index < ((size_t)1 << k2); ++index) {
 
     uint64_t L = index;   // index is the initial L
-    size_t Salpha = 0;   // sum of alpha
+    size_t Salpha = 0;   // sum of alpha, which are the number of increases
     int reducedTo1 = 0;
     if (L == 0) goto next;
 
@@ -404,7 +401,7 @@ finish:
 
       }
 
-      // will crash if steps limit was reached or if overflow, but who cares?
+      // will crash if steps limit was reached or if overflow (n is too large), but who cares?
       steps += delayk2[n];
 
       if (steps > stepsMax) {

@@ -83,6 +83,7 @@ calculate the following using Python 3, then put it as your TASK_ID_KERNEL2...
 Then set the following as your TASK_ID...
   remainder = (274133054632352106267 % (9 << TASK_SIZE_KERNEL2))
   TASK_ID = (remainder % (1 << k)) // (1 << TASK_SIZE)
+where I am using a double slash, //, for integer division.
 
 
 (c) 2021 Bradley Knockel
@@ -110,7 +111,7 @@ const int k = 36;
 
 /*
   For 2^k2 lookup tables to do k2 steps at a time after the initial k steps
-  3 < k2 < 37
+  3 < k2 < 37, where k2 < 37 so that table fits in uint64_t
   Will use more than 2^(k2 + 3) bytes of RAM
   For my GPU, 16 is the best because it fits in GPU cache
 */
@@ -130,7 +131,7 @@ const int k2 = 16;
   (fraction of sieve not excluded) * 2^TASK_SIZE should be much larger than the number of CUDA Cores you have
 */
 const int TASK_SIZE = 20;
-const int TASK_UNITS = 16;
+const int TASK_UNITS = 16;   // for OpenCL, global_work_size = 2^TASK_UNITS
 
 
 

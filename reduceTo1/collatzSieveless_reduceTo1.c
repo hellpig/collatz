@@ -191,7 +191,7 @@ const int TASK_SIZE = 20;        // TASK_SIZE <= k
 
 /*
   For a smaller 2^k2 sieve to do k2 steps at a time after the initial k steps
-  3 < k2 < 37
+  3 < k2 < 37, where k2 < 37 so that table fits in uint64_t
   Will use more than 2^(k2 + 3) bytes of RAM
 */
 const int k2 = 15;
@@ -356,7 +356,7 @@ int main(int argc, char *argv[]) {
   for (size_t index = 0; index < ((size_t)1 << k2); ++index) {
 
     uint64_t L = index;   // index is the initial L
-    size_t Salpha = 0;   // sum of alpha
+    size_t Salpha = 0;   // sum of alpha, which are the number of increases
     int reducedTo1 = 0;
     if (L == 0) goto next;
 
