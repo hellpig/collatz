@@ -12,7 +12,7 @@ uint ctz(uint n) {
 }
 */
 
-uint pow3(size_t n)
+uint pow3(size_t n)   // returns 3^n
 {
 	uint r = 1;
 	uint b = 3;
@@ -61,7 +61,7 @@ __kernel void worker(
 
 		int R = SIEVE_LOGSIZE2;  /* counter */
 
-		size_t Salpha = 0; /* sum of alpha */
+		size_t Salpha = 0; /* sum of alpha, which are the number of increases */
 
 		if (L == 0) { arrayLarge2[index] = (ulong)0; continue; }
 
@@ -82,7 +82,7 @@ __kernel void worker(
 				beta = min(beta, (size_t)R);
 				R -= beta;
 				L >>= beta;
-			} 
+			}
 		} while (R);
 
 
