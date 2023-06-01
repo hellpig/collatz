@@ -77,14 +77,14 @@ That is, for k=11 and c=7 (where a "1" means a decrease)...
   00001101010
   10001001010
 is actually k=6 and c=4...
-  000011
-  100010
+  000011   (gives s1 = 65)
+  100010   (gives s2 = 146)
+which is actualized by n1 = 64*N + 15 joining n2 = 64*N + 14 (where N >= 0).
 You can then conclude that the final non-identical step must have opposite directions.
 
 Note that the first step determines if s is even or odd and that s1 is always odd.
 So, deltaN is even only if s2 starts with an increase.
-s2 starting with an increase can be a meaningful possibility because what n1 and n2
-  increase into could be excluded (they may reduce in j<=k steps).
+s2 starting with an increase can be a non-trivial possibility.
 
 Note that the location of the final increase matters, let's call them step1 and step2.
 2^step1 - 2^step2 is only divisible by 3 if step2-step1 is even.
@@ -105,18 +105,10 @@ If you try to get the s2 to be ...11, the last 3 steps of the following
   could reduce a "crossed by 1" situation back to joining...
     s1: ...110
     s2: ...011
-The condition for the initial k -> k-3 steps with c -> c-1 increases
-  to "cross by 1" is
-    deltaN = (deltaS - 2^k) / 3^c
-  where deltaN is the initial deltaN.
-For k = 11 -> 8 and c = 7 -> 6...
-  s1 = 697      (from possibility = [0,0,0,0,0,1,0,1])
-  s2 = 2660     (from possibility = [1,1,0,0,0,0,0,0])
-  2^8 = 256
-  3^6 = 729
-so such a thing seems possible especially since...
-  (2^5 - 2^4 - 2^6) mod 3 = 0
-  (2^6 - 2^5 - 2^7) mod 3 = 0
+The above gives deltaN = (1 - 4) / 3 = -1, which is what I mean by
+  "crossed by 1".
+An example of this is n1 = 262144 N + 183295 and n2 = 262144 N + 183294
+  joining paths after 18 steps (N >= 0).
 
 Note that, for k=5 and c=1, the following gives deltaN = 5...
   01111
@@ -124,7 +116,8 @@ Note that, for k=5 and c=1, the following gives deltaN = 5...
 In general, for odd k and c=1, you'll get
   deltaN = something2 * (2^k - 2^c) / 3^c
   where something2 = 1/2
-So, me enforcing minC makes a huge difference on deltaN !
+So, enforcing minC makes a huge difference on deltaN !
+In fact, this code makes sure that n1 never reduces for any of the k steps.
 
 
 
@@ -154,7 +147,8 @@ Placing 2nd increase  (to keep deltaS%9 == 0)...
   so...
     (offset + 2^a - 2^b)%3 = 0
     where a and b are the positions of the 2nd increase
-  For the following offset%3, C returns a negative answer if offset is negative,
+  For the following offset%3, C programming language
+    returns a negative answer if offset is negative,
     so add 3 to any negative answer.
   If offset%3 = 0
     a = b + 2*i   where i is any integer

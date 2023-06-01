@@ -1,7 +1,7 @@
 /* ******************************************
 
-Find deltaN, count numbers to be tested,
-  and find unique patterns for 2^k sieve.
+For 2^k sieve, find deltaN, count numbers to be tested,
+  and find unique patterns.
 Patterns are compressed 4-to-1 by only looking at n%4==3.
 Not a huge amount of RAM is used.
 
@@ -76,15 +76,15 @@ Using the same derivation idea above, you may find a tighter limit...
     deltaN <= something2 * (2^k - 2^minC) / 3^minC
 I bet a clever person could restrict deltaN more since deltaN must be an integer.
   In fact, I succeeded! Here are some of the results that take no more
-  than a couple hours to find...
+  than a couple hours to compute using collatzFindDeltaNbound.c...
     k = 41: deltaN <= 1215
     k = 42: deltaN <= 1647
     k = 43: deltaN <= 1647
     k = 44: deltaN <= 4207
     k = 45: deltaN <= 5231
     k = 46: deltaN <= 5231
-  I still need to run these k values to get the actual experimental deltaN,
-    but the above numbers GREATLY speed this up!
+  I then need to use this file to run these k values to get the actual experimental
+    deltaN, but the above numbers GREATLY speed this up!
 
 
 
@@ -648,11 +648,15 @@ next_platform:
   uint32_t *collectDeltaNequals1count = malloc(sizeof(uint32_t) * patternsPerArraySmall);
 
 
+
+
   // run task_id in groups and save after each group
-  for (uint64_t task_id_group = loadCheckpoint; task_id_group < taskGroups; task_id_group++) {
+  for (uint64_t task_id_group = loadCheckpoint; task_id_group < taskGroups; task_id_group++)
+  {
 
   // loop over task_id to repeatedly call the kernel and analyze results
-  for (uint64_t task_id = task_id_group * tasksPerSave; task_id < (task_id_group + 1) * tasksPerSave; task_id++) {
+  for (uint64_t task_id = task_id_group * tasksPerSave; task_id < (task_id_group + 1) * tasksPerSave; task_id++)
+  {
 
 
 
@@ -684,6 +688,11 @@ next_platform:
 		printf("[ERROR] clEnqueueReadBuffer failed with = %" PRIi32 "\n", ret);
 		return -1;
 	}
+
+
+
+
+
 
 	/* run next kernel */
 	if ( task_id < taskIDmax - 1 ) {

@@ -3,7 +3,7 @@
 typedef unsigned __int128 uint128_t;
 
 
-uint pow3(size_t n)
+uint pow3(size_t n)   // returns 3^n
 {
 	uint r = 1;
 	uint b = 3;
@@ -58,7 +58,7 @@ __kernel void worker(
 
 		int notReduced = 1;   /* acts as a boolean */
 
-		size_t Salpha = 0; /* sum of alpha */
+		size_t Salpha = 0;  /* sum of alpha, which are the number of increases */
 
 		if (L == 0) goto next;
 

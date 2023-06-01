@@ -1,7 +1,7 @@
 /* ******************************************
 
-Find deltaN distribution, count numbers to be tested,
-  and find unique patterns for 2^k sieve.
+For 2^k sieve, find deltaN, count numbers to be tested,
+  and find unique patterns.
 collatzCPU.c can experimentally search for deltaN too (and count numbers to be tested)!
 Patterns are compressed 4-to-1 by only looking at n%4==3.
 Practically no RAM is used.
@@ -65,7 +65,7 @@ This code checks for the situation that b==i and i>1
 
 
 
-In addition to collatzSieve2toK_basicReduction.c, this file does an extra search.
+This file does an extra search.
 For n0 belonging to the numbers less than 2^k that remain to be excluded,
   see if n0 joins the path of any numbers n0 - deltaN <= n < n0
   in the same j<=k steps having undergone the same c increases.
@@ -95,19 +95,19 @@ Using the same derivation idea above, you may find a tighter limit...
     deltaN <= something2 * (2^k - 2^minC) / 3^minC
 I bet a clever person could restrict deltaN more since deltaN must be an integer.
   In fact, I succeeded! Here are some of the results that take no more
-  than a minute to find...
+  than a minute to compute using collatzFindDeltaNbound.c...
     k = 36: deltaN <= 383
     k = 37: deltaN <= 383
     k = 38: deltaN <= 671
     k = 39: deltaN <= 679
     k = 40: deltaN <= 679
-  I still needed to run these k values to get the actual experimental deltaN,
-    but the above numbers GREATLY speed this up!
+  I then need to use this file to run these k values to get the actual experimental
+    deltaN, but the above numbers GREATLY speed this up!
 I bet I could speed up the code by only searching the deltaN for the current step.
   That is, don't use the same deltaN for each of the j <= k steps.
   But whatever.
 
-For any N >= 0, the following will be excluded if 2^k includes what multiplies N...
+For any N >= 0, the following will be excluded if what multiplies N is <= 2^k...
   64 N + 15         (deltaN = 1)
   128 N + 95        (deltaN = 1)
   256 N + 63        (deltaN = 1)
@@ -283,8 +283,8 @@ int main(void) {
   else if (k<=35) deltaN = 46;
   else if (k<=37) deltaN = 88;
   else if (k<=40) deltaN = 120;
-  else if (k<=41) deltaN = 1215;  // needs experimental reduction
-  else {
+  else if (k<=43) deltaN = 208;
+  else {    // needs experimental reduction
     int minC = 0.6309297535714574371 * k + 1.0;  // add 1 to get ceiling
     double minC3 = 1.0;     // 3^minC
     for (j=0; j<minC; j++) minC3 *= 3.0;
