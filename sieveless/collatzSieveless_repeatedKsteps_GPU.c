@@ -102,7 +102,7 @@ const int k = 51;
 
 
 /*
-  For a 2^k2 sieve to do k2 steps at a time after the initial k steps
+  For a 2^k2 lookup table to do k2 steps at a time after the initial k steps
   3 < k2 < 37, where k2 < 37 so that table fits in uint64_t
   Will use more than 2^(k2 + 3) bytes of RAM
   For my GPU, 18 is the best because it fits in GPU cache
@@ -112,7 +112,7 @@ const int k2 = 18;
 
 
 /*
-  For kernel1 and kernel1_2, which make the sieves...
+  For kernel1 and kernel1_2, which make the sieve and lookup table...
     TASK_UNITS <= TASK_SIZE <= k
     TASK_UNITS <= k2
   Will use more than 2^(TASK_SIZE + 4) bytes of RAM
@@ -149,7 +149,7 @@ __uint128_t deltaN_max = 222;     // don't let deltaN be larger than this
 // set kernel files
 static const char *kernel1   = "kernel1.cl";                  // for k1
 static const char *kernel1_2 = "kernel1_2_repeatedKsteps.cl"; // for k2
-static const char *kernel2   = "kernel2_repeatedKsteps.cl";   // for actually using sieves
+static const char *kernel2   = "kernel2_repeatedKsteps.cl";   // for actually using sieve and lookup table
 
 
 
