@@ -21,7 +21,7 @@ dontCheckMod9 = False     # don't change this
 
 def takeStep(list, index, offset):
 
-    if list[index] == float('inf'):
+    if list[index] == float('inf'):   # if branch has been killed, kill sub branches
       list[index] = float('inf')
       list[index + offset] = float('inf')
       return
@@ -33,11 +33,11 @@ def takeStep(list, index, offset):
 
     #if list[index]%3 == 1 and temp2&1 and (dontCheckMod9 or temp2%3 != 0):     # to make (2*n - 1)/3 be counted as 2 steps
     if temp%3 == 1 and (dontCheckMod9 or temp2%3 != 0):
-      list[index + offset] = temp2
+      list[index + offset] = temp2          # decrease
     else:
-      list[index + offset] = float('inf')
+      list[index + offset] = float('inf')   # kill this branch
 
-    list[index] = temp
+    list[index] = temp         # increase
 
 
 def spreadHalfWithSmallest(list):
@@ -61,9 +61,10 @@ for i in range(N):     # bifurcate for N steps
   mHalf = 1<<(N-i-1)   # half of m
   for j in range(1<<i):  # bifurcate the previous 2^i values
     takeStep(list, j*m, mHalf)
+  #print(list)    # run this for N = 4 to understand how this code works
 
 # for each step, choose the path containing the smallest number
-for i in range(delay - 3 - N - 2):
+for j in range(delay - 3 - N - 2):
   spreadHalfWithSmallest(list)
   for i in range(0, length, 2):
     takeStep(list, i, 1)

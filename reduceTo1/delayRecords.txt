@@ -1,3 +1,8 @@
+I added the column labeled "delay", and I confirmed all corresponding records
+  and their order.
+The other delays are from...
+  http://www.ericr.nl/wondrous/delrecs.html
+
 		delay	N
 1	1	1	2
 2	7	5	3
