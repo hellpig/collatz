@@ -37,7 +37,7 @@ I call one algorithm the "n++ n--" algorithm (or, in my filenames, just "npp"). 
 [http://www.ericr.nl/wondrous/pathrecs.html](http://www.ericr.nl/wondrous/pathrecs.html)  
 The algorithm is described in a great paper and corresponding GitHub code [1]. Unlike his codes, I currently do not try to find the max n in my code, but adding this capability would be very easy.
 
-I call another algorithm the "repeated k steps" algorithm. This is fastest for testing the Collatz conjecture (and for counting steps to 1). The algorithm is described in [2]. The "n++ n--" can still be used for creating sieves and lookup tables.
+I call another algorithm the "repeated k steps" algorithm. This is fastest for testing the Collatz conjecture (and for counting steps to 1). The algorithm is described in [2]. The "n++ n--" can still be used for creating sieves and lookup tables, though, for CPU-only code, especially 64-bit-unsigned-integer code, it is not faster because it has to keep making sure it doesn't go too many steps. See reduceTo1/collatzSieveless_reduceTo1.c for CPU code that uses "n++ n--" for lookup tables *and* sieves (it was an experiment).
 
 [1] Bařina, David. (2020). Convergence verification of the Collatz problem. The Journal of Supercomputing. 10.1007/s11227-020-03368-x.  
 [https://rdcu.be/b5nn1](https://rdcu.be/b5nn1)  
@@ -232,7 +232,6 @@ Not surprisingly, this code runs successfully on Nvidia too! Though I suppose th
 ## Things that may or may not be minor improvements to my codes
 
 If you enjoy the details of coding, please improve my code!
-1. If you want to speed things up a bit more, my CPU-only sieveless codes don't yet use "n++ n--" when generating the sieve. In my GPU code that uses hold[] and holdC[] (any code before "partially sieveless"), the initial calculation of these by the CPU could also be converted to the "n++ n--" algorithm.
 1. I am still somewhat confused about how caching on GPUs works with OpenCL. For my "repeated k steps" code, there may be a better way to get the lookup table (arrayLarge2[] in kernel2) into a faster cache.
 1. In kernel2_npp.cl, I have some code commented out that pre-calculates a variable, threeToSalpha, because using threeToSalpha slows down the code for some reason. Why? Would threeToSalpha slow down CUDA code also?
 1. On a GPU, why does a 3^2 sieve run slower than a 3^1 sieve? On a CPU, the 3^2 sieve is faster than a 3^1 sieve. I never compared speeds of 3^1 vs 3^2 for any "repeated k steps" code or any CUDA code.
