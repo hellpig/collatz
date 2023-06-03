@@ -451,30 +451,29 @@ finish:
 
 
       // calculate bb and c
+      int alpha, beta;
       int R = k;   // counter
       if (bb == 0) goto next1;
       do {
         bb++;
-        do {
-            int alpha = __builtin_ctzll(bb);
-            alpha = min(alpha, (size_t)R);
-            R -= alpha;
-            bb >>= alpha;
-            bb *= c3[alpha];
-            c += alpha;
-            if (R == 0) {
-              bb--;
-              goto next1;
-            }
-        } while (!(bb & 1));
+        if ((uint64_t)n == 0) alpha = 64;  // __builtin_ctzll(0) is undefined
+        else alpha = __builtin_ctzll(bb);
+        alpha = min(alpha, (size_t)R);
+        R -= alpha;
+        bb >>= alpha;
+        bb *= c3[alpha];
+        c += alpha;
+        if (R == 0) {
+          bb--;
+          goto next1;
+        }
         bb--;
-        do {
-            int beta = __builtin_ctzll(bb);
-            beta = min(beta, (size_t)R);
-            R -= beta;
-            bb >>= beta;
-            if (R == 0) goto next1;
-        } while (!(bb & 1));
+        if ((uint64_t)n == 0) beta = 64;  // __builtin_ctzll(0) is undefined
+        else beta = __builtin_ctzll(bb);
+        beta = min(beta, (size_t)R);
+        R -= beta;
+        bb >>= beta;
+        if (R == 0) goto next1;
       } while (1);
 
 next1:
@@ -496,26 +495,24 @@ next1:
           int R = k;   // counter
           do {
             bm++;
-            do {
-                int alpha = __builtin_ctzll(bm);
-                alpha = min(alpha, (size_t)R);
-                R -= alpha;
-                bm >>= alpha;
-                bm *= c3[alpha];
-                cm += alpha;
-                if (R == 0) {
-                  bm--;
-                  goto next2;
-                }
-            } while (!(bm & 1));
+            if ((uint64_t)n == 0) alpha = 64;
+            else alpha = __builtin_ctzll(bm);
+            alpha = min(alpha, (size_t)R);
+            R -= alpha;
+            bm >>= alpha;
+            bm *= c3[alpha];
+            cm += alpha;
+            if (R == 0) {
+              bm--;
+              goto next2;
+            }
             bm--;
-            do {
-                int beta = __builtin_ctzll(bm);
-                beta = min(beta, (size_t)R);
-                R -= beta;
-                bm >>= beta;
-                if (R == 0) goto next2;
-            } while (!(bm & 1));
+            if ((uint64_t)n == 0) beta = 64;
+            else beta = __builtin_ctzll(bm);
+            beta = min(beta, (size_t)R);
+            R -= beta;
+            bm >>= beta;
+            if (R == 0) goto next2;
           } while (1);
 
 next2:
