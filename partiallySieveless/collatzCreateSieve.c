@@ -2,7 +2,7 @@
 
 Uses a 16-to-1 compression by storing a uint16_t to reference 256 numbers.
 This only works for k >= 8
-Each bit of the uint16_t will be referring to the following 16 bits of the 256...
+Each bit of the uint16_t will be referring to the following 16 numbers of the 256...
  27
  31
  47
@@ -78,8 +78,8 @@ int main(void) {
   file0 = fopen("sieve", "wb");      // you might want to change filename
 
 
-  int j;
-  uint64_t b, b0, m, deltaN, lenList, n0;
+  int j, c, cm;
+  uint64_t b, b0, m, bm, deltaN, lenList;
   int temp;           // acts as a boolean
   uint16_t bytes = 0;   // 2 bytes that store the pattern
 
@@ -100,8 +100,8 @@ int main(void) {
   else if (k<=35) deltaN = 46;
   else if (k<=37) deltaN = 88;
   else if (k<=40) deltaN = 120;
-  else if (k<=41) deltaN = 1215;  // needs experimental reduction
-  else {
+  else if (k<=43) deltaN = 208;
+  else {        // needs experimental reduction
     int minC = 0.6309297535714574371 * k + 1.0;  // add 1 to get ceiling
     double minC3 = 1.0;     // 3^minC
     for (j=0; j<minC; j++) minC3 *= 3.0;
@@ -116,11 +116,6 @@ int main(void) {
   print128(deltaN);
   printf("\n");
 
-  // in the following lists, the 0th element is for n0
-  uint64_t* nList = (uint64_t*)malloc((deltaN+1)*sizeof(uint64_t));
-  int* cList = (int*)malloc((deltaN+1)*sizeof(int));
-
-
  
   for (uint64_t pattern = 0; pattern < patterns; pattern++) {
   for (int bit = 0; bit < 16; bit ++) {      // loop over 16 bits in pattern
@@ -131,9 +126,11 @@ int main(void) {
 
     // check to see if 2^k*N + b0 is reduced in no more than k steps
     b = b0;
-    for (j=1; j<=k; j++) {  // step
+    c = 0;
+    for (j=0; j<k; j++) {  // step
       if (b & 1) {          // bitwise test for odd
         b = 3*(b/2) + 2;    // note that b is odd
+        c++;
       } else {
         b >>= 1;
         if (b <= b0) {
@@ -146,29 +143,27 @@ int main(void) {
 
     // if temp=1, use another method to try to get temp=0
     if (temp) {
-      n0 = b0;   // it helps my brain to rename it
-      lenList = ((deltaN+1) < (n0-1)) ? (deltaN+1) : (n0-1) ;   // get min(deltaN+1, n0-1)
-      for(m=0; m<lenList; m++) nList[m] = n0-m;    // initialize nList
-      for(m=0; m<lenList; m++) cList[m] = 0;       // initialize cList
-      for(j=1; j<=k; j++) {           // steps
-        for(m=0; m<lenList; m++) {    // loop over lists
+      lenList = ((deltaN+1) < (b0-1)) ? (deltaN+1) : (b0-1) ;   // get min(deltaN+1, b0-1)
+      for(m=1; m<lenList; m++) {    // loop over starting numbers
 
-          // take step to update lists
-          if (nList[m] & 1) {                 // bitwise test for odd
-            nList[m] = 3*(nList[m]/2) + 2;    // note that nList[m] is odd
-            cList[m]++;
+        bm = b0-m;
+        cm = 0;
+        // take steps to update lists
+        for(j=0; j<k; j++) {
+          if (bm & 1) {                 // bitwise test for odd
+            bm = 3*(bm/2) + 2;    // note that bm is odd
+            cm++;
           } else {
-            nList[m] >>= 1;
+            bm >>= 1;
           }
-
-          // check against 0th element
-          if ( m>0 && nList[m]==nList[0] && cList[m]==cList[0] ) {
-            temp = 0;
-            j=k+1;       // to prevent future loops
-            break;
-          }
-      
         }
+
+        // check against original path
+        if ( bm==b && cm==c ) {
+          temp = 0;
+          break;
+        }
+
       }
     }
 
