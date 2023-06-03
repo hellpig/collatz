@@ -37,7 +37,7 @@ It seems that [I'm not the first to conclude such things](http://www.ericr.nl/wo
 
 The strategy I would recommend is to use the "A > 0" sieves because they are easier to generate. For A=0, you can just [look up the record for highest steps](http://www.ericr.nl/wondrous/delrecs.html), so you don't have to run it (note that this list counts (3n + 1)/2 as 2 steps). Use the same 3 steps I gave for choosing "sieveless" parameters, and your k will have to be small unless you set your deltaN_max to be low enough.
 
-I wrote **collatzSieveless_reduceTo1_Aequals0.c** to run the A=0 case. I quickly ran up to 2^36, and I verified that, up through 2^36, counting (3n + 1)/2 as a single step gives the same records as the table I just linked to (with simply a smaller delay). I also found that 762 is the record delay for a 2^36 sieve.
+I wrote **collatzSieveless_reduceTo1_Aequals0.c** to run the A=0 case. It is a very simply code that doesn't even use any 2^k sieve. I quickly ran up to 2^36, and I verified that, up through 2^36, counting (3n + 1)/2 as a single step gives the same records as the table I just linked to (with simply a smaller delay). I also found that 762 is the record delay for a 2^36 sieve.
 
 I ran the following "sieveless" files using a 2^36 sieve to allow for a 2^50 sieve. A 2^50 sieve would require setting *STEPS_MAX* (or *stepsMax* for CPU-only code) to at least 1161. I verified that, up through 9\*2^47, counting (3n + 1)/2 as a single step gives the same records as counting it as 2 steps (with simply a different delay).
 * collatzSieveless_reduceTo1.c (my CPU-only code)
