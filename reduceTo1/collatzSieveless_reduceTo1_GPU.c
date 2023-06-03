@@ -796,6 +796,7 @@ next_platform:
         __uint128_t n0 = n0start + index;
 
         __uint128_t lenList = ((deltaN+1) < (n0-1)) ? (deltaN+1) : (n0-1) ;   // get min(deltaN+1, n0-1)
+        if (n0 == 0) lenList = 0;
         for(size_t m=1; m<lenList; m++) {
 
             if ( index >= m ) {

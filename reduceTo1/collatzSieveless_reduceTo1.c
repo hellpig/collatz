@@ -98,15 +98,6 @@ I do lots of bitwise operations in this code!
 
 
 
-For this paragraph, I will use a double slash, //, for integer division.
-  (3*n+1) / 2 = 3*(n//2) + 2
-since n//2 = (n-1)/2 since n is odd.
-It is better to use 3*(n//2) + 2 because you calculate n//2 THEN multiply by 3
-allowing n to be twice as large without causing an overflow.
-This is a minor improvement worth doing!
-(Though David Barina's algorithm no longer requires this calculation!)
-
-
 
 If overflow is reached, you may have found a number that
   could disprove the conjecture! Overflow must be carefully checked.
@@ -155,6 +146,7 @@ calculate the following using Python 3, then put it as your task_id0...
 Then set the following as your TASK_ID...
   remainder = (274133054632352106267 % (9 << TASK_SIZE0))
   task_id = (remainder % (1 << k)) // (1 << TASK_SIZE)
+where I am using a double slash, //, for integer division.
 
 
 
@@ -454,33 +446,79 @@ finish:
       __uint128_t bb = b;  // will become fk(b)
       int c = 0;           // number of increases experienced when calculated fk(b)
 
+
+
+
+
       // calculate bb and c
-      for (j=0; j<k; j++) {   // step
-        if (bb & 1) {         // bitwise test for odd
-          bb = 3*(bb/2) + 2;  // note that bb is odd
-          c++;
-        } else {
-          bb >>= 1;
-        }
-      }
+      int R = k;   // counter
+      if (bb == 0) goto next1;
+      do {
+        bb++;
+        do {
+            int alpha = __builtin_ctzll(bb);
+            alpha = min(alpha, (size_t)R);
+            R -= alpha;
+            bb >>= alpha;
+            bb *= c3[alpha];
+            c += alpha;
+            if (R == 0) {
+              bb--;
+              goto next1;
+            }
+        } while (!(bb & 1));
+        bb--;
+        do {
+            int beta = __builtin_ctzll(bb);
+            beta = min(beta, (size_t)R);
+            R -= beta;
+            bb >>= beta;
+            if (R == 0) goto next1;
+        } while (!(bb & 1));
+      } while (1);
+
+next1:
+      ;
+
+
 
 
       // see if paths merge
       __uint128_t lenList = ((deltaN+1) < (b-1)) ? (deltaN+1) : (b-1) ;   // get min(deltaN+1, b-1)
+      if (b == 0) lenList = 0;
       for(m=1; m<lenList; m++) {    // loop over lists
 
           __uint128_t bm = b - m;
           int cm = 0;
 
+
           // take k steps to get bm and cm
-          for(j=0; j<k; j++) {
-            if (bm & 1) {
-              bm = 3*(bm/2) + 2;
-              cm++;
-            } else {
-              bm >>= 1;
-            }
-          }
+          int R = k;   // counter
+          do {
+            bm++;
+            do {
+                int alpha = __builtin_ctzll(bm);
+                alpha = min(alpha, (size_t)R);
+                R -= alpha;
+                bm >>= alpha;
+                bm *= c3[alpha];
+                cm += alpha;
+                if (R == 0) {
+                  bm--;
+                  goto next2;
+                }
+            } while (!(bm & 1));
+            bm--;
+            do {
+                int beta = __builtin_ctzll(bm);
+                beta = min(beta, (size_t)R);
+                R -= beta;
+                bm >>= beta;
+                if (R == 0) goto next2;
+            } while (!(bm & 1));
+          } while (1);
+
+next2:
 
           // check bm and cm against bb and c
           if ( bm == bb && cm == c ) {
