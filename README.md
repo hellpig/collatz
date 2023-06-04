@@ -37,7 +37,7 @@ I call one algorithm the "n++ n--" algorithm (or, in my filenames, just "npp"). 
 [http://www.ericr.nl/wondrous/pathrecs.html](http://www.ericr.nl/wondrous/pathrecs.html)  
 The algorithm is described in a great paper and corresponding GitHub code [1]. Unlike his codes, I currently do not try to find the max n in my code, but adding this capability would be very easy.
 
-I call another algorithm the "repeated k steps" algorithm. This is fastest for testing the Collatz conjecture (and for counting steps to 1). The algorithm is described in [2]. The "n++ n--" can still be used for creating sieves and lookup tables, though, for CPU-only code, especially 64-bit-unsigned-integer code, it is not faster because it has to keep making sure it doesn't go too many steps. See reduceTo1/collatzSieveless_reduceTo1.c for CPU code that uses "n++ n--" for lookup tables *and* sieves (it was an experiment).
+I call another algorithm the "repeated k steps" algorithm. This is fastest for testing the Collatz conjecture (and for counting steps to 1). The algorithm is described in [2]. The "n++ n--" can still be used for creating sieves and lookup tables, though, for CPU-only code, especially 64-bit-unsigned-integer code (as opposed to 128-bit), it is not faster because it has to keep making sure it doesn't go too many steps.
 
 [1] Bařina, David. (2020). Convergence verification of the Collatz problem. The Journal of Supercomputing. 10.1007/s11227-020-03368-x.  
 [https://rdcu.be/b5nn1](https://rdcu.be/b5nn1)  
