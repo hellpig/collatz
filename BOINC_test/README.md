@@ -2,7 +2,7 @@
 
 Here are my efforts to make a BOINC server that runs my Collatz code. The following notes are a work in progress that I don't much intend to finish. I currently only am testing CPU-only code on a BOINC server on an Ubuntu laptop on my local network.
 
-Instructions for installing BOINC server...  
+Instructions for installing a BOINC server...  
 [https://boinc.berkeley.edu/trac/wiki/ServerIntro](https://boinc.berkeley.edu/trac/wiki/ServerIntro)
 
 I don't want to use any of the bundled BOINC installers because I'm not convinced that they are maintained or documented correctly, and you end up spending the same amount of time learning about all of their bundling stuff like Docker or whatever and trying to overcome their limitations. You eventually will want to change all the settings to how you want them, so just do it the right way (from scratch) from the beginning.
@@ -90,7 +90,7 @@ bin/xadd
 On my local network, I could now go to  
 [http://192.168.0.201/awesome](http://192.168.0.201/awesome)  
 [http://192.168.0.201/awesome_ops](http://192.168.0.201/awesome_ops)  
-When restarting your server, the BOINC server works even before you log into the server.
+When restarting your computer, the BOINC server works even before you log in.
 
 
 
