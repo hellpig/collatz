@@ -113,12 +113,12 @@ inline int mod9(__uint128_t num) {
 
 // trick for quickly doing num/3 if num is __uint128_t
 inline __uint128_t div3(__uint128_t num) {
-    uint64_t a = (uint32_t)(num >> 96);
-    uint64_t b = (uint32_t)(num >> 64);
-    uint64_t c = (uint32_t)(num >> 32);
-    uint64_t d = (uint32_t)(num);
-    return (a+b+c+d)/3 + c*(1431655765) + b*((__uint128_t)6148914691236517205ull) + a*((__uint128_t)1431655765ull << 64 | (__uint128_t)6148914691236517205ull);
+    uint64_t a = (uint64_t)(num)        & 0xfffffffffffffff;
+    uint64_t b = (uint64_t)(num >>  60) & 0xfffffffffffffff;
+    uint64_t c = (uint64_t)(num >> 120);
+    return (a+b+c)/3 + b*((__uint128_t)384307168202282325ull) + c*((__uint128_t)24019198012642645ull << 64 | (__uint128_t)6148914691236517205ull);
 }
+
 
 
 
