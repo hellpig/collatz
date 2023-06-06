@@ -28,6 +28,7 @@ Nvidia on Windows has a weird thing for OpenCL (maybe CUDA too). A printf() insi
 
 At any point, please ask me if anything here is unclear! I achieved my codes by communicating with various people, so please do the same!
 
+I am curious how these codes will run on ARM CPUs. Nvidia Jetson has Nvidia GPUs running on ARM. I wouldn't expect the OpenCL or CUDA kernels to be effected by the CPU, but how will the host code run? How will my CPU-only codes run on Apple's M1 chips, which are ARM? Is gcc's \_\_builtin_ctzll(0) still undefined?
 
 
 ## There are two good algorithms
