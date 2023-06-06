@@ -6,6 +6,7 @@
     but this can be easily changed by uncommenting 2 parts.
 
   You are meant to run this on a 64-bit computer.
+  This code uses 128-bit unsigned integers.
 
   To use...
     g++ -O3 collatzSetDelay.cpp
@@ -16,7 +17,10 @@
 #include <algorithm>  // for std::sort
 
 
-// set target
+/*
+  Set target.
+  delay >= 5 since the first 3 and last 2 steps are always done.
+*/
 const int delay = 1000;
 
 
@@ -25,13 +29,20 @@ const int delay = 1000;
     RAM usage is proportional to PATHS. RAM is about 20*PATHS bytes.
     Required time is roughly proportional to PATHS.
       PATHS = 10^6 takes a minute for delay=1000.
+
+  I was trying to find all the delay records with this code
+  using (2*n - 1)/3 as 1 step,
+  and the first one to require many PATHS is...
+    26623 with a delay of 194 requiring 104441 PATHS
+  The next delay record to require more PATHS is... 
+    142587 with a delay of 236 requiring 1314652 PATHS
+  The next delay record to require more PATHS is... 
+    1501353 with a delay of 333 requiring 120E6 < PATHS < 200E6
 */
-const size_t PATHS = 1000000;
+const size_t PATHS = 100000;
 
 
 
-#define UINT128_MAX (~(__uint128_t)0)
-bool dontCheckMod9 = false;    // don't change this initialization
 std::vector<__uint128_t> list;
 
 
@@ -111,13 +122,14 @@ inline __uint128_t div3(__uint128_t num) {
 
 
 
-void takeStep() {
+void takeStep(bool dontCheckMod9) {
+  const __uint128_t MAX = (~(__uint128_t)0) >> 1;  // 2^127 - 1
   size_t stop = list.size();
   size_t i = 0;
   while (i<stop) {
 
     // handle overflow
-    if (list[i] > (UINT128_MAX >> 1)) {
+    if (list[i] > MAX) {
 
 /*
       // use this instead to make (2*n - 1)/3 be counted as 2 steps
@@ -136,6 +148,7 @@ void takeStep() {
         list.pop_back();
       }
 
+      printf("*");
       continue;
     }
 
@@ -154,7 +167,7 @@ void takeStep() {
     int temp2 = mod9(temp);
     if ( temp2==4 || temp2==7 || (dontCheckMod9 && temp2==1) )
       list.push_back(div3(temp));  // decrease
-    list[i++] = temp;             // increase
+    list[i++] = temp;    // increase; try to keep the main (first) part of list[] sorted
 
 
   }
@@ -163,7 +176,10 @@ void takeStep() {
 
 
 int main () {
-  list.reserve(2 * PATHS);   // feel free to reduce this!
+
+  list.clear();
+  list.reserve(2 * PATHS);   // feel free to reduce this! PATHS only grows by about 33% each step
+  printf("  delay = %i, PATHS = %zu\n", delay, PATHS);
 
   // do first 3 steps manually to avoid the trivial cycle
   list.push_back(8);
@@ -174,18 +190,17 @@ int main () {
       std::sort(list.begin(), list.end());  // sort entire list[]
       list.resize(PATHS);
     }
-    takeStep();
+    takeStep(false);
     //checkSteps(j+3+1);
   }
 
   // do the final 2 steps
-  dontCheckMod9 = true;
   for (int j=0; j < 2; j++) {
     if (list.size() > PATHS) {
       std::sort(list.begin(), list.end());
       list.resize(PATHS);
     }
-    takeStep();
+    takeStep(true);
     //checkSteps(delay-1+j);
   }
 
