@@ -98,17 +98,19 @@ int main(void) {
     /* __uint128_t c = (__uint128_t)1 << 127; */
 
     // set these to match your setup
-    cl_platform_id platform = 0;
-    cl_device_id device = 0;
+    int platformID = 0;
+    int deviceID = 0;
 
     // Configure the OpenCL environment
-    clGetPlatformIDs(1, &platform, NULL);
-    clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, 1, &device, NULL);
+    cl_platform_id platforms[100];
+    cl_device_id devices[100];
+    clGetPlatformIDs(100, platforms, NULL);
+    clGetDeviceIDs(platforms[platformID], CL_DEVICE_TYPE_GPU, 100, devices, NULL);
     char deviceName[1024];
-    clGetDeviceInfo(device, CL_DEVICE_NAME, 1024, deviceName, NULL);
+    clGetDeviceInfo(devices[deviceID], CL_DEVICE_NAME, 1024, deviceName, NULL);
     printf(">>> %s\n", deviceName);
-    cl_context context = clCreateContext(NULL, 1, &device, NULL, NULL, NULL);
-    cl_command_queue queue = clCreateCommandQueue(context, device, 0, NULL);
+    cl_context context = clCreateContext(NULL, 1, devices, NULL, NULL, NULL);
+    cl_command_queue queue = clCreateCommandQueue(context, devices[deviceID], 0, NULL);
 
     // Compile the kernel
     cl_program program = clCreateProgramWithSource(context, 1, &kernelString, NULL, NULL);
@@ -116,9 +118,9 @@ int main(void) {
 
     // Check for compilation errors
     size_t logSize;
-    clGetProgramBuildInfo(program, device, CL_PROGRAM_BUILD_LOG, 0, NULL, &logSize);
+    clGetProgramBuildInfo(program, devices[deviceID], CL_PROGRAM_BUILD_LOG, 0, NULL, &logSize);
     char* messages = (char*)malloc((1+logSize)*sizeof(char));
-    clGetProgramBuildInfo(program, device, CL_PROGRAM_BUILD_LOG, logSize, messages, NULL);
+    clGetProgramBuildInfo(program, devices[deviceID], CL_PROGRAM_BUILD_LOG, logSize, messages, NULL);
     messages[logSize] = '\0';
     if (logSize > 10) { printf(">>> Compiler message: %s\n", messages); }
     free(messages);
