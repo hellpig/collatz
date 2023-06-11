@@ -14,7 +14,7 @@ Note that, when I count steps, I count (3n + 1)/2 as one step. It's the natural 
 
 To compile CPU-only and OpenCL code, I use gcc or clang. To compile CUDA code, I use nvcc.
 
-To test OpenCL on your system, see **testBug64.c**, **testBug128.c**, and **cldemo.c**. If testBug128.c will not even run or gives bad results, you can still use the GPU, but you have to use my 
+To test OpenCL on your system, see **testBug64.c**, **testBug128.c**, and **cldemo.c**. If testBug128.c will not even run or gives bad results, you can still use the GPU, but you have to use my *128byHand* (or CUDA) codes.
 
 Unless mentioned otherwise, GPU code is for Nvidia GPUs because I found many unforgivable arithmetic errors from Intel and AMD GPUs. Even if using OpenCL instead of CUDA, Nvidia requires that you install Nvidia CUDA Toolkit. Unless mentioned otherwise, GPU code is OpenCL.
 
