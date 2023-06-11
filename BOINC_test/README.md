@@ -441,8 +441,8 @@ As for whether or not to make a separate BOINC application for GPU, putting CPU-
 
 First, look at boinc-src/samples/nvcuda/ and  
 [https://boinc.berkeley.edu/trac/wiki/GPUApp](https://boinc.berkeley.edu/trac/wiki/GPUApp)  
-[https://boinc.berkeley.edu/trac/wiki/AppCoprocessor](https://boinc.berkeley.edu/trac/wiki/AppCoprocessor)
-
+[https://boinc.berkeley.edu/trac/wiki/AppCoprocessor](https://boinc.berkeley.edu/trac/wiki/AppCoprocessor)  
+The second link, among other things, explains how to deal with multiple GPUs on the same computer.
 
 
 
