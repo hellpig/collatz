@@ -14,7 +14,7 @@ Note that, when I count steps, I count (3n + 1)/2 as one step. It's the natural 
 
 To compile CPU-only and OpenCL code, I use gcc or clang. To compile CUDA code, I use nvcc.
 
-To test OpenCL on your system, see **testBug64.c**, **testBug128.c**, and **cldemo.c**.
+To test OpenCL on your system, see **testBug64.c**, **testBug128.c**, and **cldemo.c**. If testBug128.c will not even run or gives bad results, you can still use the GPU, but you have to use my 
 
 Unless mentioned otherwise, GPU code is for Nvidia GPUs because I found many unforgivable arithmetic errors from Intel and AMD GPUs. Even if using OpenCL instead of CUDA, Nvidia requires that you install Nvidia CUDA Toolkit. Unless mentioned otherwise, GPU code is OpenCL.
 
@@ -24,7 +24,7 @@ For OpenCL on macOS, use the *-framework opencl* option of gcc (instead of the u
 
 For OpenCL on Windows, you need Cygwin. Select the gcc-core and libOpenCL-devel packages when installing Cygwin (does Nvidia need libOpenCL-devel?). For Cygwin, gcc needs */cygdrive/c/Windows/System32/OpenCL.DLL* as an argument (instead of the usual *-lOpenCL* option). To get a printf() in an OpenCL kernel to work in Cygwin, I had to add C:\cygwin64\bin\ to the Windows Path then run via the usual cmd.exe.
 
-Nvidia on Windows has a weird thing for OpenCL (maybe CUDA too). A printf() inside an OpenCL kernel needs *llu* for ulong (*lu* only prints 32 bits), but, even though this is OpenCL and *lu* works on Windows with Intel and AMD GPUs, needing *llu* is a typical Windows thing I guess. On second thought, a long integer is always 64-bit in OpenCL, so this behavior by Nvidia is actually a bug. Luckily, *llu* works for Nvidia-on-Linux and for a couple other situations, so I just switched all my OpenCL kernels to use *llu*. Anyway, I wonder if PRIu64 works in OpenCL for all devices and platforms. 
+Nvidia on Windows has a weird thing for OpenCL (maybe CUDA too). A printf() inside an OpenCL kernel needs *llu* for ulong (*lu* only prints 32 bits), but, even though this is OpenCL and *lu* works on Windows with Intel and AMD GPUs, needing *llu* is a typical Windows thing I guess. On second thought, a long integer is always 64-bit in OpenCL, so this behavior by Nvidia is actually a bug. Luckily, *llu* works for Nvidia-on-Linux and for a couple other situations (but not for AMD-on-Windows), so I just switched all my OpenCL kernels to use *llu*. Anyway, I wonder if PRIu64 works in OpenCL for all devices and platforms. 
 
 At any point, please ask me if anything here is unclear! I achieved my codes by communicating with various people, so please do the same!
 
@@ -130,7 +130,7 @@ If you want to run both the GPU and CPU-only code simultaneously, be sure to use
 If you have already have up to some number tested by a non-sieveless approach, you can still easily use this sieveless approach! For my CPU-only code, adjust aStart manually. For my GPU code, adjust h_minimum and h_supremum in kernel2, keeping in mind that integer literals larger than 64-bit don't work (so use bit shifts). If you do this, be sure to change the "aMod = 0" line!
 
 If you want to use general GPUs...
-* For computers with watchdog timers, a maxSteps variable must be introduced, and a message should be printed whenever testing a number goes beyond those steps. Having a way to detect an infinite cycle or a number that is slowly making its way to infinity is crucial.
+* For computers with watchdog timers, a maxSteps variable must be introduced, and a message should be printed whenever testing a number goes beyond those steps. Having a way to detect an infinite cycle or a number that is slowly making its way to infinity is crucial. Another solution is to try to remove the watchdog timer! I was using an AMD GPU once that had a 5-second timer, but, after I installed PRO drivers, the watchdog timer went away!
 * For computers with watchdog timers, you will likely have to modify the code to call kernel2 multiple times, each time with a different h_minimum and h_supremum.
 * To accommodate GPUs (and CPUs) without ECC RAM, you'll have to run each task twice to validate.
 * The 128-bit integers should become OpenCL's uint4 to prevent arithmetic errors on non-Nvidia GPUs. I believe that ulong arithmetic should never be used on Intel or AMD GPUs. Another solution could be to look at my testBug64.c and testBug128.c to understand the bugs, then test each device for these bugs before running the Collatz code. Update: I have now discovered that whether or not certain GPUs return a correct checksum is not perfectly correlated with the bugs in those two test files, so, before allowing a GPU to contribute, I'd also run some test numbers on each GPU to make sure the correct checksum is created!
