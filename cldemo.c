@@ -80,7 +80,7 @@ int main(int argc, char **argv)
 	cl_device_id devices[100];
 	cl_uint devices_n = 0;
 	// CL_CHECK(clGetDeviceIDs(NULL, CL_DEVICE_TYPE_ALL, 100, devices, &devices_n));
-        //   change the 0 to view devices on another platform (Brad K.)
+        //   change the 0 below to view devices on another platform (Brad K.)
 	CL_CHECK(clGetDeviceIDs(platforms[0], CL_DEVICE_TYPE_GPU, 100, devices, &devices_n));
 
 	printf("=== %d OpenCL device(s) found on platform:\n", devices_n);
@@ -140,7 +140,7 @@ int main(int argc, char **argv)
 		abort();
 	}
 	//CL_CHECK(clUnloadCompiler());
-        CL_CHECK(clUnloadPlatformCompiler(platforms[0]));  // has been renamed (edit by Brad K.)
+        CL_CHECK(clUnloadPlatformCompiler(platforms[0]));  // has been renamed; not necessary, but change the 0 if using another platform (edit by Brad K.)
 
 	cl_mem input_buffer;
 	input_buffer = CL_CHECK_ERR(clCreateBuffer(context, CL_MEM_READ_ONLY, sizeof(int)*NUM_DATA, NULL, &_err));

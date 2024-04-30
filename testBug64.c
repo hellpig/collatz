@@ -67,7 +67,7 @@ int main(void) {
     char deviceName[1024];
     clGetDeviceInfo(devices[deviceID], CL_DEVICE_NAME, 1024, deviceName, NULL);
     printf(">>> %s\n", deviceName);
-    cl_context context = clCreateContext(NULL, 1, devices, NULL, NULL, NULL);
+    cl_context context = clCreateContext(NULL, deviceID+1, devices, NULL, NULL, NULL);
     cl_command_queue queue = clCreateCommandQueue(context, devices[deviceID], 0, NULL);
 
     // Compile the kernel
