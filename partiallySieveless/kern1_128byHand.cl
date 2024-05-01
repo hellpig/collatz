@@ -72,9 +72,6 @@ struct uint128_t{ ulong hi; ulong lo; };
 // <<
 /*
    0 < b < 64
-   which requires that 0 < (TASK_SIZE_KERNEL2 - k) < 64
-   and k not be larger than 63.
-   k not being too large is the important restriction.
 */
 static inline struct uint128_t leftBitShift( struct uint128_t a, int b){
   a.hi = (a.hi << b) | (a.lo >> (64-b));
