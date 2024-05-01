@@ -196,6 +196,8 @@ Since implementing 128-bit integers as two 64-bit integers in OpenCL might be be
 * kern2_npp_128byHand.cl
 * kern2_repeatedKsteps_128byHand.cl
 
+Note that any kernel2 that is 128byHand has a leftBitShift defined that limits its functionality in that certain parameters such as k are more restricted. Read the comments for leftBitShift in the kernel. This limited leftBitShift is implemented because the functionality is hardly affected and it speeds up the code.
+
 I tested speeds on a Nvidia Quadro P4000. The 128byHand codes are always faster than the older OpenCL codes. CUDA seems to be faster than these 128byHand codes when TASK_SIZE_KERNEL2 is quite large, and these 128byHand codes seem to be faster than CUDA when TASK_SIZE is quite large.
 
 Using by-hand uint128_t is faster than native \_\_uint128\_t on GPU, which was surprisingly, so trying CPU-only code that does uint128_t seems like a good idea. Partly because cuda_uint128.h has limitations (for example, cannot divide by uint128_t), my goal is always to use the minimal amount of by-hand code, so, on GPU, I only changed the kernel code. For OpenCL, since some of my devices don't like the native 128-bit implementation (won't compile or will give arithmetic errors), all 128-bit integers in kernels was made to be by-hand. For CUDA, I had to change all the code in the kernels because there is no alternative. For CPU-only code, I just need everything in the main loop (over patterns) to be by-hand, which **collatzPartiallySieveless_npp_128byHand.cpp** does. On my I5-3210M CPU, 128byHand is slower, though maybe ARM CPUs would be different?
