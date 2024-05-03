@@ -959,6 +959,10 @@ next_platform:
 
 
   for (int i = 0; i < (1 << CHUNKS_KERNEL2); i++) {
+    /*
+    printf(".");
+    fflush(stdout);
+    */
 
 
 	/* run kernel 2 */
@@ -978,25 +982,25 @@ next_platform:
 
 
 
-        /*
-	   Wait for kernel2 to finish and enforce a time limit.
-	   Basically, just use usleep() in a loop that checks if the kernel is done or if time limit is reached.
-	   I would like to thank the developers at primegrid.com for sharing this idea with me!
-	*/
+    /*
+       Wait for kernel2 to finish and enforce a time limit.
+       Basically, just use usleep() in a loop that checks if the kernel is done or if time limit is reached.
+       I would like to thank the developers at primegrid.com for sharing this idea with me!
+    */
 
-	cl_int info = CL_QUEUED;   // arbitrary start
-	while(info != CL_COMPLETE){
-		usleep(1000);    // sleep for 1/1000 of a second
-		ret = clGetEventInfo(kernelsDone, CL_EVENT_COMMAND_EXECUTION_STATUS, sizeof(cl_int), &info, NULL);
-		if ( ret != CL_SUCCESS ) { printf( "ERROR: clGetEventInfo\n" ); return -1; }
+    cl_int info = CL_QUEUED;   // arbitrary start
+    while(info != CL_COMPLETE){
+      usleep(1000);    // sleep for 1/1000 of a second
+      ret = clGetEventInfo(kernelsDone, CL_EVENT_COMMAND_EXECUTION_STATUS, sizeof(cl_int), &info, NULL);
+      if ( ret != CL_SUCCESS ) { printf( "ERROR: clGetEventInfo\n" ); return -1; }
 
-		gettimeofday(&tv3, NULL);
-		if ((double)(tv3.tv_usec - tv2.tv_usec) / 1000000.0 + (double)(tv3.tv_sec - tv2.tv_sec) > secondsKernel2) {
-			printf( "ERROR: time limit reached!\n" );
-			return -1;
-		}
-	}
-	clReleaseEvent(kernelsDone);
+      gettimeofday(&tv3, NULL);
+      if ((double)(tv3.tv_usec - tv2.tv_usec) / 1000000.0 + (double)(tv3.tv_sec - tv2.tv_sec) > secondsKernel2) {
+        printf( "ERROR: time limit reached!\n" );
+        return -1;
+      }
+    }
+    clReleaseEvent(kernelsDone);
 
 
 
