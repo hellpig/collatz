@@ -18,17 +18,22 @@ To test OpenCL on your system, see **testBug64.c**, **testBug128.c**, and **clde
 
 Unless mentioned otherwise, GPU code is for Nvidia GPUs because I found many unforgivable arithmetic errors from Intel and AMD GPUs. Even if using OpenCL instead of CUDA, Nvidia requires that you install Nvidia CUDA Toolkit. Unless mentioned otherwise, GPU code is OpenCL.
 
-I of course would recommend Linux as your OS.
+I recommend Linux as your OS for Nvidia and maybe even for Intel GPUs. I had bad experiences with an AMD GPU on Linux. The following install commands are for Ubuntu. For my specific Nvidia GPU, I needed to run `sudo apt install nvidia-driver-455 nvidia-cuda-toolkit`. For a very old Intel GPU, I needed `sudo apt install beignet-dev`. For newer Intel GPUs, I needed `sudo apt install intel-opencl-icd opencl-headers ocl-icd-opencl-dev`. For my AMD GPU, I needed `sudo apt install mesa-opencl-icd opencl-headers ocl-icd-opencl-dev`.
 
 For OpenCL on macOS, use the *-framework opencl* option of gcc (instead of the usual Linux *-lOpenCL* option). Keep in mind that OpenCL (and CUDA) on macOS is deprecated.
 
-For OpenCL on Windows, you need Cygwin. Select the gcc-core and libOpenCL-devel packages when installing Cygwin (does Nvidia need libOpenCL-devel?). For Cygwin, gcc needs */cygdrive/c/Windows/System32/OpenCL.DLL* as an argument (instead of the usual *-lOpenCL* option). To get a printf() in an OpenCL kernel to work in Cygwin, I had to add C:\cygwin64\bin\ to the Windows Path then run via the usual cmd.exe.
+For OpenCL on Windows, you need Cygwin. Select the gcc-core and libOpenCL-devel packages when installing Cygwin (does Nvidia need libOpenCL-devel?). For Cygwin, gcc needs */cygdrive/c/Windows/System32/OpenCL.DLL* as an argument (instead of the usual *-lOpenCL* option). To get a printf() in an OpenCL kernel to work in Cygwin, I had to add C:\cygwin64\bin\ to the Windows Path then run via the usual cmd.exe (that is, not the Cygwin64 Terminal).
 
-Nvidia on Windows has a weird thing for OpenCL (maybe CUDA too). A printf() inside an OpenCL kernel needs *llu* for ulong (*lu* only prints 32 bits), but, even though this is OpenCL and *lu* works on Windows with Intel and AMD GPUs, needing *llu* is a typical Windows thing I guess. On second thought, a long integer is always 64-bit in OpenCL, so this behavior by Nvidia is actually a bug. Luckily, *llu* works for Nvidia-on-Linux and for a couple other situations (but not for AMD-on-Windows), so I just switched all my OpenCL kernels to use *llu*. Anyway, I wonder if PRIu64 works in OpenCL for all devices and platforms. 
+Nvidia on Windows has a weird thing for OpenCL (maybe CUDA too). A printf() inside an OpenCL kernel needs *llu* for ulong (*lu* only prints 32 bits), but, even though this is OpenCL and *lu* works on Windows with Intel and AMD GPUs, needing *llu* is a typical Windows thing I guess. On second thought, a long integer is always 64-bit in OpenCL, so this behavior by Nvidia is actually a bug. Luckily, *llu* works for Nvidia-on-Linux and for a couple other situations (but not for AMD-on-Windows), so I just switched all my OpenCL kernels to use *llu*. Anyway, I wonder if PRIu64 works in OpenCL for all devices and platforms.
 
 At any point, please ask me if anything here is unclear! I achieved my codes by communicating with various people, so please do the same!
 
 I am curious how these codes will run on ARM CPUs. Nvidia Jetson has Nvidia GPUs running on ARM. I wouldn't expect the OpenCL or CUDA kernels to be effected by the CPU, but how will the host code run? How will my CPU-only codes run on Apple's M1 chips, which are ARM? Is gcc's \_\_builtin_ctzll(0) still undefined?
+
+**2024 update**: Intel and AMD GPUs on Windows no longer seem to correctly support \_\_int128 within OpenCL: sometimes, a kernel won't compile (clBuildProgram will fail), sometimes clEnqueueNDRangeKernel will freeze, and sometimes the kernel will simply never finish running. I would argue that OpenCL *never* supported \_\_int128 because division never worked (maybe division works on Nvidia's OpenCL?). Intel (and maybe AMD) have never supported \_\_int128 on Linux. Luckily, my nonNvidiaGPU code does not use \_\_int128, but achieves 128-bit integers by hand. Some of my code uses \_\_int128 (collatzSieve2toK_FindPatterns_GPU.c, code in the sieveless folder, and code in the reduceTo1 folder), though this is mostly unimportant code that could be converted to my 128byHand approach.
+
+**Another 2024 update**: I just noticed that [CUDA now supports \_\_int128](https://developer.nvidia.com/blog/implementing-high-precision-decimal-arithmetic-with-cuda-int128/)! Me using the initially-buggy-but-fixed-by-me GPL file cuda_uint128.h to get 128-bit support on CUDA was sketchy, so, if I get access to another Nvidia GPU, I'd love to make another version of the code that removes this dependency! There are currently only 3 files (all in the partiallySieveless folder) that use cuda_uint128.h, and I would add \_128byHand to the filenames of the two CUDA files (the third file is CPU-only, not CUDA) once I created the \_\_int128 versions of them.
+
 
 
 ## There are two good algorithms
@@ -196,7 +201,7 @@ Since implementing 128-bit integers as two 64-bit integers in OpenCL might be be
 * kern2_npp_128byHand.cl
 * kern2_repeatedKsteps_128byHand.cl
 
-Note that any kernel2 that is 128byHand has a leftBitShift defined that limits its functionality in that certain parameters such as k are more restricted. Read the comments for leftBitShift in the kernel. This limited leftBitShift is implemented because the functionality is hardly affected and it speeds up the code.
+Note that any kernel2 that is 128byHand has a leftBitShift defined that limits its functionality in that certain parameters such as k are more restricted. Read the comments for leftBitShift in the kernel file. This limited leftBitShift is implemented because the functionality is hardly affected and, assuming a not optimal kernel compiler, it speeds up the code.
 
 I tested speeds on a Nvidia Quadro P4000. The 128byHand codes are always faster than the older OpenCL codes. CUDA seems to be faster than these 128byHand codes when TASK_SIZE_KERNEL2 is quite large, and these 128byHand codes seem to be faster than CUDA when TASK_SIZE is quite large.
 
@@ -212,7 +217,7 @@ Here are things I typically had to do to get things to work...
 * In kern2, I always had to move const struct uint128_t UINT128_MAX = {~(ulong)0, ~(ulong)0} into the actual kernel.
 * For my Intel HD Graphics 4000, I often had to change all instances of -cl-std=CL2.0 to -cl-std=CL1.2 in the host code. Simply not specifying the OpenCL version also works!
 * I think I always have to get rid of all goto statements in the kernels. I don't really know if this is always required because only my macOS code actually runs successfully! For sure, macOS didn't like certain goto statements in the kernels (though perhaps just goto statements that I no longer use for any of my codes). Because I couldn't figure out why these goto statements were creating issues, I decided to get rid of all goto statements. Getting rid of goto statements wasn't super hard: (1) several goto statements can be replaced with logic using variable R, and (2) the rest of the goto statements can be replaced with logic of an int you create (I called mine go or stop, initialized to 1 or 0).
-* Using Beignet on Linux, I had to change %llu to %lu in the kernels (as previously discussed).
+* Using Beignet on Linux, I had to change %llu to %lu in the kernels (as previously discussed). Newer Intel OpenCL Linux drivers do not require %lu.
 * On macOS, I had to write my own ctz() function! I shouldn't have to do this!
 * For my Intel HD Graphics 4000, the variable TASK_SIZE_KERNEL2 must be reduced because my GPU has a watchdog timer of about 5 seconds. A better fix would be to change my kern2 to run only a fraction of the h values, then I could call clEnqueueNDRangeKernel() multiple times so that each call would take less than 5 seconds, so this is how I did it!
 
@@ -227,6 +232,8 @@ See my partiallySieveless_nonNvidiaGPU/ folder for the code. I used what I learn
 For "repeated k steps" with its current parameters, running ./a.out 0 0 should return a checksum of 8639911566 for TASK_SIZE_KERNEL2 = 60 and a checksum of 1105908468282 for TASK_SIZE_KERNEL2 = 67. Running ./a.out 26 71353562 should return an overflow for TASK_SIZE_KERNEL2 = 60, and running ./a.out 0 71353562 should return an overflow for TASK_SIZE_KERNEL2 = 67.
 
 For "n++ n--" with its current parameters, running ./a.out 0 0 should return a checksum of 5574358187 for TASK_SIZE_KERNEL2 = 60 and a checksum of 713529553875 for TASK_SIZE_KERNEL2 = 67. Running ./a.out 5 130502703 should return an overflow for TASK_SIZE_KERNEL2 = 60, and running ./a.out 0 130502703 should return an overflow for TASK_SIZE_KERNEL2 = 67.
+
+Due to my leftBitShift implementation in kern2, to get TASK_SIZE_KERNEL2 = 60 to work, change CHUNKS_KERNEL2 from 9 to 8 if k = 51 is kept.
 
 Not surprisingly, this code runs successfully on Nvidia too! Though I suppose that an Nvidia GPU on Windows would need all the %lu in kernels changed to %llu due to the Nvidia Windows bug. Keep in mind the Nvidia bug where you can get CPU busy-waiting when using OpenCL with Nvidia; my CUDA codes would never cause CPU busy waiting.
 
