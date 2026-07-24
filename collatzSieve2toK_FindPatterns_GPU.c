@@ -329,7 +329,7 @@ int main(void) {
 
 	/* setup OpenCL and start first kernel run */
 
-	int g_ocl_ver1 = 0;
+	int g_ocl_ver1 = 0;  // keep this as false (0) so that ctz() is well defined
 	int g_device_index = 0;
 
 	cl_mem mem_obj_arraySmall;

@@ -353,7 +353,10 @@ int main(void) {
       } else {
         b >>= 1;
         if (b <= b0) {
-          if (b==b0 && b0>1) {printf("  wow!\n");}
+          if (b == b0 && b0 > 1) {
+            fprintf(stderr, "Nontrivial cycle detected at %" PRIu64 "\n", b0);
+            return 1;
+          }
           temp = 0;
           break;
         }
@@ -424,8 +427,14 @@ int main(void) {
       // add aa to patterns if not already in patterns (binary search; sorted)
       mm = binarySearch(0, nn-1, aa);
       if (patterns[mm] != aa) {       // add into a sorted patterns[]
+        if (nn >= length) {
+          fprintf(stderr, "Error: patterns[] capacity exceeded.\n");
+          return 1;
+        }
+
         for (oo = nn; oo > mm; oo--)  // shift things over by 1 spot
           patterns[oo] = patterns[oo - 1];
+
         patterns[mm] = aa;
         nn++;
       }
