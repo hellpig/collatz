@@ -51,7 +51,7 @@ __kernel void worker(
 
 	for (size_t index = i_minimum; index < i_supremum; ++index) {
 
-		uint128_t L0 = index + (task_id << TASK_SIZE);
+    uint128_t L0 = (uint128_t)index + ((uint128_t)task_id << TASK_SIZE);
 		uint128_t L = L0;
 
 		int R = SIEVE_LOGSIZE;  /* counter */

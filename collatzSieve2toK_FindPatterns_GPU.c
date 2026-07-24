@@ -434,7 +434,7 @@ next_platform:
 		return -1;
 	}
 
-	for (; (cl_uint)device_index < num_devices; ++device_index) {
+	//for (; (cl_uint)device_index < num_devices; ++device_index) {
 		printf("[DEBUG] device_index = %i...\n", device_index);
 
 		context = clCreateContext(NULL, 1, &device_id[device_index], NULL, NULL, &ret);
@@ -564,7 +564,7 @@ next_platform:
 		}
 
 
-	}
+	//}
 
 
 
@@ -698,7 +698,12 @@ next_platform:
 	if ( task_id < taskIDmax - 1 ) {
 
 		task_id_run = task_id + 1;
-		clSetKernelArg(kernel, 3, sizeof(cl_ulong), (void *)&task_id_run);
+		ret = clSetKernelArg(kernel, 3, sizeof(cl_ulong), (void *)&task_id_run);
+
+    if (ret != CL_SUCCESS) {
+      printf("[ERROR] clSetKernelArg(task_id) failed with %" PRIi32 "\n", ret);
+      return -1;
+    }
 
 		ret = clEnqueueNDRangeKernel(command_queue, kernel, 1, NULL, &global_work_size, NULL, 0, NULL, NULL);
 
@@ -842,8 +847,14 @@ next_platform:
       // add aa to patterns if not already in patterns (binary search; sorted)
       mm = binarySearch(0, nn-1, aa);
       if (patterns[mm] != aa) {       // add into a sorted patterns[]
+        if (nn >= length) {
+          fprintf(stderr, "Error: patterns[] capacity exceeded; increase length.\n");
+          return 1;
+        }
+
         for (oo = nn; oo > mm; oo--)  // shift things over by 1 spot
           patterns[oo] = patterns[oo - 1];
+
         patterns[mm] = aa;
         nn++;
       }
