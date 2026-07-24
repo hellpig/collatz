@@ -85,7 +85,8 @@ I bet a clever person could restrict deltaN more since deltaN must be an integer
     k = 46: deltaN <= 5231
   I then need to use this file to run these k values to get the actual experimental
     deltaN, but the above numbers GREATLY speed this up!
-
+  Actually, ChatGPT is more clever than me,
+    so collatzFindDeltaNbound_grouped.c gives even tighter bounds!
 
 
 Parts of this file are modified from...
@@ -283,8 +284,7 @@ int main(void) {
   else if (k<=37) deltaN = 88;
   else if (k<=40) deltaN = 120;
   else if (k<=43) deltaN = 208;
-  else if (k<=45) deltaN = 222;
-  else if (k<=46) deltaN = 5231;  // needs experimental reduction
+  else if (k<=46) deltaN = 222;
   else if (k<=47) deltaN = 6015;  // needs experimental reduction
   else {
     int minC = 0.6309297535714574371 * k + 1.0;  // add 1 to get ceiling

@@ -103,6 +103,8 @@ I bet a clever person could restrict deltaN more since deltaN must be an integer
     k = 40: deltaN <= 679
   I then need to use this file to run these k values to get the actual experimental
     deltaN, but the above numbers GREATLY speed this up!
+  Actually, ChatGPT is more clever than me,
+    so collatzFindDeltaNbound_grouped.c gives even tighter bounds!
 I bet I could speed up the code by only searching the deltaN for the current step.
   That is, don't use the same deltaN for each of the j <= k steps.
   But whatever.
@@ -284,6 +286,8 @@ int main(void) {
   else if (k<=37) deltaN = 88;
   else if (k<=40) deltaN = 120;
   else if (k<=43) deltaN = 208;
+  else if (k<=46) deltaN = 222;
+  else if (k<=47) deltaN = 6015;  // needs experimental reduction
   else {    // needs experimental reduction
     int minC = 0.6309297535714574371 * k + 1.0;  // add 1 to get ceiling
     double minC3 = 1.0;     // 3^minC
@@ -354,7 +358,7 @@ int main(void) {
         b >>= 1;
         if (b <= b0) {
           if (b == b0 && b0 > 1) {
-            fprintf(stderr, "Nontrivial cycle detected at %" PRIu64 "\n", b0);
+            fprintf(stderr, "Nontrivial cycle detected at %" PRIu64 "\n", b0);  // this should never happen given known bounds on cycle length
             return 1;
           }
           temp = 0;
