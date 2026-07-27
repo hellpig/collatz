@@ -228,6 +228,7 @@ __kernel void worker(
 				R -= beta;
 				rightBitShiftEquals(nextL, beta);
 			}
+      if (!R) break;  /* crucial because rightBitShiftEquals(nextL, 0) is undefined */
 			addOne(nextL);
 			do {
 				int alpha = ctz((uint)nextL.lo);

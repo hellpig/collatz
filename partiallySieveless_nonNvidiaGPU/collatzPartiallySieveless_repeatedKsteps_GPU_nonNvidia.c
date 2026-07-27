@@ -26,7 +26,10 @@ Note that I use the "long long" function strtoull when reading in the arguments.
 
 Currently loads in a sieve file, which must must match the k1 value set in this code.
 
-k < 81 must be true
+k < 81 must be true.
+While kern2 uses its current restricted leftBitShift,
+  k < 64 and TASK_SIZE_KERNEL2 - k < 64 must also be true.
+  leftBitShift can be rewritten to support larger shifts.
 
 
 
