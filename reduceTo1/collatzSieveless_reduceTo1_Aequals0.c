@@ -401,7 +401,7 @@ finish:
 
       }
 
-      // will crash if steps limit was reached or if overflow (n is too large), but who cares?
+      // will crash if steps limit was reached or if overflow (n is too large), but who cares? This is just A=0 code
       steps += delayk2[n];
 
       if (steps > stepsMax) {

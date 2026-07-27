@@ -833,7 +833,7 @@ next_platform:
 
   /* pad indices[] to make global_work_size2 a multiple of 32 */
   for (int j = 0; j < (global_work_size2 % 32); j++) {
-    indices[global_work_size2] = 0;
+    indices[global_work_size2] = ~(uint64_t)0;
     global_work_size2++;
   }
 

@@ -65,6 +65,10 @@ struct timeval tv1, tv2;
   For the OpenCL kernel
     TASK_UNITS <= TASK_SIZE <= k
   If set incorrectly, they will be fixed by the code.
+
+  The following are also required
+    0 <= k - TASK_SIZE < 64
+    TASK_SIZE < 64
 */
 int TASK_SIZE = 26;    // will use a bit more than 2^(TASK_SIZE + 4) bytes of RAM
 int TASK_UNITS = 16;   // for OpenCL, global_work_size = 2^TASK_UNITS
@@ -438,7 +442,7 @@ next_platform:
 
   fflush(stdout);
 
-  n0start = loadCheckpoint * tasksPerSave * arrayIncreasesCount;
+  n0start = (__uint128_t)loadCheckpoint * tasksPerSave * arrayIncreasesCount;
   count = 0;
   maxM = 0;  // see if deltaN is ever really reached
   double timePrior = 0;   // from before loaded checkpoint

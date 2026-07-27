@@ -154,8 +154,9 @@ __kernel void worker(
 
 
 
-	size_t index = indices[id];
-	if (index == 0) return;   // arrayLarge[0], arrayLarge[1], and arrayIncreases[0] are 0; this does not need to be checked
+  ulong indexTemp = indices[id];
+  if (indexTemp == ~(ulong)0) return;  // padding entry
+  size_t index = (size_t)indexTemp;
 
 	uint128_t L0 = ((uint128_t)TASK_ID << TASK_SIZE) + index;
 

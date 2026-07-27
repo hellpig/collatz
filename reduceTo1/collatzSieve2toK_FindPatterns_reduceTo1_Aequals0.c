@@ -14,6 +14,14 @@ to prevent bottlenecks due to sharing resources.
 
 Since reducing to 1 in k steps is rare, there might be a faster way of doing this.
 
+
+collectMaxM and maxMtiny must be uint64_t if deltaN does not fit
+in uint32_t.
+
+collectCount and countTiny must be uint64_t if K >= 32,
+because one group contains 2^K numbers.
+
+
 (c) 2021 Bradley Knockel
 
 ****************************************** */

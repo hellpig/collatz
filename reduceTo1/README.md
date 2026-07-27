@@ -37,7 +37,7 @@ It seems that [I'm not the first to conclude such things](http://www.ericr.nl/wo
 
 The strategy I would recommend is to use the "A > 0" sieves because they are easier to generate. For A=0, you can just [look up the record for highest steps](http://www.ericr.nl/wondrous/delrecs.html), so you don't have to run it (note that this list counts (3n + 1)/2 as 2 steps). Use the same 3 steps I gave for choosing "sieveless" parameters, and your k will have to be small unless you set your deltaN_max to be low enough.
 
-I wrote **collatzSieveless_reduceTo1_Aequals0.c** to run the A=0 case. It is a very simply code that doesn't even use any 2^k sieve. I quickly ran up to 2^36, and I verified that, up through 2^36, counting (3n + 1)/2 as a single step gives the same records as the table I just linked to (with simply a smaller delay). I also found that 762 is the record delay for a 2^36 sieve.
+I wrote **collatzSieveless_reduceTo1_Aequals0.c** to run the A=0 case. It is a very simply code that doesn't even use any 2^k sieve. I quickly ran up to 2^36, and I verified that, up through 2^36, counting (3n + 1)/2 as a single step gives the same records as the table I just linked to (with simply a smaller delay). I do not know whether this coincidence continues indefinitely. I also found that 762 is the record delay for a 2^36 sieve.
 
 I ran the following "sieveless" files using a 2^36 sieve to allow for a 2^50 sieve. A 2^50 sieve would require setting *STEPS_MAX* (or *stepsMax* for CPU-only code) to at least 1161. I verified that, up through 9\*2^47, counting (3n + 1)/2 as a single step gives the same records as counting it as 2 steps (with simply a different delay).
 * collatzSieveless_reduceTo1.c (my CPU-only code)
@@ -91,3 +91,9 @@ Here are the numbers not excluded as a function of deltaN_max for k=10 with delt
   deltaN_max = 2: 572  
   deltaN_max = 1: 673 out of 1024 must be run  
 Note that deltaN's that are of the form 2^integer are the most common. 
+
+Possible next steps...
+1. I could pursue a partially-sieveless version of the reduce-to-1 programs. I would first want to measure how effective a sieve limited to deltaN=1 would be.
+1. I could add the option to count each grouped bit-shift operation as one step, regardless of how many bits are shifted. This would define delay differently from both the conventional Collatz delay and my current shortcut-map delay.
+1. I could implement 128-bit arithmetic by hand, allowing the GPU programs to run on devices without native 128-bit integer support.
+1. Adapting something like collatzFindDeltaNbound_grouped.c to produce a safe bound for the reduce-to-1 case appears straightforward. However, adapting it to produce a substantially tighter bound would require a more substantial change to the grouped algorithm.

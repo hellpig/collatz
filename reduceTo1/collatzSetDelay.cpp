@@ -3,7 +3,8 @@
   Look ahead for the best path
     keeping the smallest PATHS paths for each step you take.
   (2*n - 1)/3 is counted as 1 step by default,
-    but this can be easily changed by uncommenting 2 parts.
+    but this can be changed by replacing the two active reverse-step blocks
+    with the two commented alternatives.
 
   You are meant to run this on a 64-bit computer.
   This code uses 128-bit unsigned integers.
@@ -15,6 +16,10 @@
 
 #include <vector>
 #include <algorithm>  // for std::sort
+
+#include <cstdio>
+#include <cstdint>
+#include <cstddef>
 
 
 /*
@@ -39,7 +44,7 @@ const int delay = 1000;
   The next delay record to require more PATHS is... 
     1501353 with a delay of 333 requiring 120E6 < PATHS < 200E6
 */
-const size_t PATHS = 100000;
+const size_t PATHS = 100000;   // must obviously be greater than 0
 
 
 

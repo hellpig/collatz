@@ -49,6 +49,10 @@ struct timeval tv1, tv2;
   Will use a bit more than 2^(TASK_SIZE + 4) bytes of RAM
   TASK_SIZE <= k
   If you set this larger than k, TASK_SIZE = k will be used
+
+  The following are also required
+    0 <= k - TASK_SIZE < 64
+    TASK_SIZE < 64
 */
 int TASK_SIZE = 26;
 
@@ -150,7 +154,7 @@ void kSteps(__uint128_t arrayLarge[], uint8_t arrayIncreases[], uint64_t task_id
 	#pragma omp parallel for schedule(guided) num_threads(6)
 	for (size_t index = 0; index < ((size_t)1 << TASK_SIZE); ++index) {
 
-		__uint128_t L0 = index + (task_id << TASK_SIZE);
+    __uint128_t L0 = (__uint128_t)index + ((__uint128_t)task_id << TASK_SIZE);
 		__uint128_t L = L0;
 
 		uint32_t R = k;  /* counter */
@@ -275,7 +279,7 @@ int main(void) {
 
   fflush(stdout);
 
-  n0start = loadCheckpoint * tasksPerSave * arrayIncreasesCount;
+  n0start = (__uint128_t)loadCheckpoint * tasksPerSave * arrayIncreasesCount;
   count = 0;
   maxM = 0;  // see if deltaN is ever really reached
   double timePrior = 0;   // from before loaded checkpoint
