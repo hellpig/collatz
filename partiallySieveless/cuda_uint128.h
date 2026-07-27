@@ -29,8 +29,6 @@
 
   I found this file here before I modified it...
     https://github.com/curtisseizert/CUDA-uint128
-  When I notice that the above link fixes something,
-  I remove it from my list above.
 
   For my Collatz code, I then...
     - commented out parts of my operator>>=() since I never

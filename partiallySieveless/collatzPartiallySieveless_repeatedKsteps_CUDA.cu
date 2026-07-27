@@ -186,6 +186,22 @@ __device__ uint32_t pow3(size_t n)   // returns 3^n
 	return r;
 }
 
+__device__ uint64_t pow3_64(size_t n)
+{
+  uint64_t result = 1;
+  uint64_t base = 3;
+
+  while (n) {
+    if (n & 1)
+      result *= base;
+
+    base *= base;
+    n >>= 1;
+  }
+
+  return result;
+}
+
 /* 2^8 sieve */
 __constant__ uint8_t sieve8[16];
 const uint8_t sieve8_host[16] = {27, 31, 47, 71, 91, 103, 111, 127, 155, 159, 167, 191, 231, 239, 251, 255};
@@ -276,8 +292,9 @@ __global__ void kernel1(
 			L.lo--;    // L is odd
 			do {
 				//size_t beta = ctz((uint32_t)L.lo);
-				/* note that __ffs(0) returns 0, and 0 - 1 is caught by min() later */
+				/* note that __ffs(0) returns 0, and 0 - 1 is fixed after */
 				uint32_t beta = __ffs((uint32_t)L.lo) - 1;
+				if (beta > 32) beta=32;
 
 				beta = min(beta, (uint32_t)R);
 				R -= beta;
@@ -300,8 +317,9 @@ next1:
 			/* note that nextL starts as even, so we start by decreasing */
 			do {
 				//size_t beta = ctz((uint32_t)nextL.lo);
-				/* note that __ffs(0) returns 0, and 0 - 1 is caught by min() later */
+				/* note that __ffs(0) returns 0, and 0 - 1 is fixed after */
 				uint32_t beta = __ffs((uint32_t)nextL.lo) - 1;
+				if (beta > 32) beta=32;
 
 				beta = min(beta, (uint32_t)R);
 				R -= beta;
@@ -420,8 +438,9 @@ __global__ void kernel1_2(
 			L--;
 			do {
 				//size_t beta = ctz((uint32_t)L);
-				/* note that __ffs(0) returns 0, and 0 - 1 is caught by min() later */
+				/* note that __ffs(0) returns 0, and 0 - 1 is fixed after */
 				uint32_t beta = __ffs((uint32_t)L) - 1;
+				if (beta > 32) beta=32;
 
 				beta = min(beta, (uint32_t)R);
 				R -= beta;
@@ -471,7 +490,7 @@ __global__ void kernel2(
 
 	if (threadIdx.x == 0) {
 		for (size_t i = 0; i < SIEVE_LOGSIZE2 + 1; ++i) {
-			lut[i] = pow3(i);
+			lut[i] = pow3_64(i);
 			//maxNs[i] = UINT128_MAX / lut[i];
 		}
 		maxNs[0].hi = 18446744073709551615;
@@ -770,6 +789,12 @@ int main(int argc, char *argv[]) {
 
 
 
+
+  const size_t blockSize = 32 * multipleOf32;
+
+
+
+
 	/* setup kernel stuff */
 
 	cudaError_t ret;
@@ -778,7 +803,7 @@ int main(int argc, char *argv[]) {
 	size_t arrayLargeCount = (size_t)1 << (TASK_SIZE - 3);     // two of these are needed per uint128
 	size_t arrayLarge2Count = (size_t)1 << k2;                 // for k2
 	size_t arrayIncreasesCount = (size_t)1 << (TASK_SIZE - 4); // one for each bit in portion of 2^k1 sieve
-	size_t indicesCount = (size_t)1 << (TASK_SIZE - 4);        // not all of this will be used
+  size_t indicesCount = (size_t)1 << (TASK_SIZE - 4);        // not all of this will be used
 
 	uint16_t *arraySmall = (uint16_t *)malloc(sizeof(uint16_t) * arraySmallCount);
 	uint64_t *arrayLarge = (uint64_t *)malloc(sizeof(uint64_t) * arrayLargeCount);
@@ -882,7 +907,7 @@ int main(int argc, char *argv[]) {
 	fflush(stdout);
 
         /* start kernel1 */
-	kernel1<<<global_work_size1/(32*multipleOf32), 32*multipleOf32>>>(d_arraySmall, d_arrayLarge, d_arrayIncreases, TASK_ID);
+	kernel1<<<global_work_size1 / blockSize, blockSize>>>(d_arraySmall, d_arrayLarge, d_arrayIncreases, TASK_ID);
 
 
 
@@ -914,7 +939,7 @@ int main(int argc, char *argv[]) {
 	fflush(stdout);
 
         /* start kernel1_2 */
-	kernel1_2<<<global_work_size1_2/(32*multipleOf32), 32*multipleOf32>>>(d_arrayLarge2);
+	kernel1_2<<<global_work_size1_2 / blockSize, blockSize>>>(d_arrayLarge2);
 
 
 
@@ -945,9 +970,13 @@ int main(int argc, char *argv[]) {
 
   printf("Numbers in sieve segment that need testing = %zu\n", global_work_size2);
 
-  /* pad indices[] to make global_work_size2 a multiple of (32 * multipleOf32) */
-  for (int j = 0; j < (global_work_size2 % (32 * multipleOf32)); j++) {
-    indices[global_work_size2] = (~(uint64_t)0);        // I believe this requires TASK_SIZE < 64 + 4
+
+  /* pad indices[] to make global_work_size2 a multiple of blockSize */
+
+  const size_t padding = (blockSize - global_work_size2 % blockSize) % blockSize;
+
+  for (size_t j = 0; j < padding; j++) {
+    indices[global_work_size2] = (~(uint64_t)0);     // I believe this requires TASK_SIZE < 64 + 4
     global_work_size2++;
   }
 
@@ -990,16 +1019,29 @@ int main(int argc, char *argv[]) {
 
 	cudaEvent_t event;
 	cudaEventCreateWithFlags(&event, cudaEventDisableTiming);
-	kernel2<<<global_work_size2/(32*multipleOf32), 32*multipleOf32>>>(d_indices, d_arrayLarge, d_arrayIncreases, d_arrayLarge2, TASK_ID, TASK_ID_KERNEL2);
+  if (global_work_size2 > 0) {
+	  kernel2<<<global_work_size2 / blockSize, blockSize>>>(d_indices, d_arrayLarge, d_arrayIncreases, d_arrayLarge2, TASK_ID, TASK_ID_KERNEL2);
+  }
 	cudaEventRecord(event);
 
 
 
 	/* wait for kernel2 to finish without busy waiting */
+
+  cudaError_t status;
+
 	//cudaDeviceSynchronize();
-	while(cudaEventQuery(event) != cudaSuccess) {
-		usleep(10000);  // sleep for 1/100 of a second
-	}
+  while ((status = cudaEventQuery(event)) == cudaErrorNotReady) {
+    usleep(10000);  // sleep for 1/100 of a second
+  }
+
+  if (status != cudaSuccess) {
+    printf("CUDA kernel error: %s\n", cudaGetErrorString(status));
+    return -1;
+  }
+
+  cudaEventDestroy(event);
+
 
 
 

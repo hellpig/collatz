@@ -533,7 +533,7 @@ int main(int argc, char *argv[]) {
                 if ( n > maxNs[alpha] ) {
                   printf("Overflow! nStart = ");
                   print128( ((__uint128_t)nStart.hi << 64) | nStart.lo );
-                  break;
+                  goto nextA;
                 }
                 n *= c3[alpha];     // requires alpha < 41
                 --n;
@@ -544,6 +544,9 @@ int main(int argc, char *argv[]) {
             if (n < nStart) break;
 
           }
+
+nextA:
+          ;
 
       }
 
