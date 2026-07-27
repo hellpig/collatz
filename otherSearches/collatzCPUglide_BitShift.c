@@ -4,6 +4,7 @@ Find a rolling average of the "glide" as defined here
   http://www.ericr.nl/wondrous/index.html#part2
 Except I define a step as a bit shift as defined here
   https://rdcu.be/b5nn1
+A grouped bit shift is counted as one step regardless of the number of bits.
 I will average the glides in each consecutive 2^k block of numbers,
   so it isn't a true rolling average.
 
@@ -30,8 +31,8 @@ I use the following to speed up my code...
   __builtin_ctzll(n)
 On my computer, an "unsigned long long" is only 64 bits (not 128 bits), so I limit the length
   of the lookup tables for powers of 3, and I do the following for alpha and beta...
-            if ((uint64_t)n == 0) alpha = 64;
-            else alpha = __builtin_ctzll(n);
+            if ((uint64_t)n == 0) alpha = 64 + __builtin_ctzll((uint64_t)(n >> 64));
+            else alpha = __builtin_ctzll((uint64_t)n);
 If that didn't make sense yet, don't worry about it. I just put it here to be with similar info.
 I also use the "long long" function strtoull when reading in the taskID argument.
 
@@ -60,7 +61,10 @@ think of this code as running...
 struct timeval tv1, tv2;
 
 
-/* 2^k numbers will be run */
+/*
+  2^k numbers will be run
+  2 <= k < 64
+*/
 const int k = 30;
 
 

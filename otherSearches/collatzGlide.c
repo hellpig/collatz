@@ -17,7 +17,7 @@ For example, let's start at 9...
   9 -> 14 -> 7 -> 11 -> 17 -> 26 -> 13 -> 20 -> 10 -> 5 -> 8 -> 4 -> 2 -> 1
 
 Compile and run using something like...
-  gcc -O3 collatzGlide.c
+  gcc -O3 collatzGlide.c -lm
   ./a.out
 
 

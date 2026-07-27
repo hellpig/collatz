@@ -50,7 +50,7 @@ struct timeval tv1, tv2;
 
 
 
-/* must at least be 2 */
+/*     2 <= k < 64     */
 const int k = 30;
 
 
@@ -82,7 +82,6 @@ int main(int argc, char *argv[]) {
 
 
   __uint128_t n, nStart;
-  int j;
 
 
 

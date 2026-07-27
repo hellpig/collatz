@@ -17,7 +17,7 @@ For example, let's start at 9...
   9 -> 14 -> 7 -> 11 -> 17 -> 26 -> 13 -> 20 -> 10 -> 5 -> 8 -> 4 -> 2 -> 1
 
 Compile and run using something like...
-  gcc -O3 collatzDelay.c
+  gcc -O3 collatzDelay.c -lm
   ./a.out [log2(N)]
 The argument log2(N)...
   will be converted to a double.
@@ -38,7 +38,7 @@ The expected delay depends logarithmically on N, so...
 A goal of this code is to find the number f(N).
 
 The standard deviation depends on sqrt(log2(N)), so...
-  expectedDelay = g(N) sqrt(log2(N))
+  standardDeviation = g(N) sqrt(log2(N))
 A goal of this code is to find the number g(N).
 
 
@@ -93,6 +93,9 @@ int main(int argc, char *argv[]) {
 
     for (int step=1; step <= maxSteps; step++) {
 
+      countOfRemovals = 0.0;
+      increasesOfRemovals = 0;
+
       twoToStep *= 2.0;
 
       for (int i = step - 1; i >= 0; i--) {   // i is increases done so far
@@ -108,8 +111,6 @@ int main(int argc, char *argv[]) {
           cList[i] = 0;
           break;
         }
-
-        if ( i == 0) countOfRemovals = 0.0;
 
       }
       check[step - 1] = countOfRemovals / twoToStep;

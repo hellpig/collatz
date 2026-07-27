@@ -37,7 +37,7 @@ The expected delay depends logarithmically on N, so...
 A goal of this code is to find the number f(N).
 
 The standard deviation depends on sqrt(log2(N)), so...
-  expectedDelay = g(N) sqrt(log2(N))
+  standardDeviation = g(N) sqrt(log2(N))
 A goal of this code is to find the number g(N).
 
 
@@ -168,7 +168,8 @@ int main(int argc, char *argv[]) {
 
         if ( log2_3 * i < step - log2_N ) {
 
-          // cList[i] is binomial coefficient: steps choose i
+          // cList[i] is like the binomial coefficient: steps choose i
+          // cList[i] is the number of surviving paths with i increases
           mpf_div(quotient, cList[i], twoToStep);
           quotientDouble = mpf_get_d(quotient);
           mpf_clear(cList[i]);

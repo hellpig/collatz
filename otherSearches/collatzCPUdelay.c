@@ -19,11 +19,14 @@ For example, let's start at 9...
 You'll need a 64-bit computer with a not-ancient version of gcc
   in order for __uint128_t to work. This gives a 128-bit integer!
 Compile and run using something like...
-  gcc -O3 collatzCPUdelay.c
+  gcc -O3 collatzCPUdelay.c -lm
   ./a.out [log2(N)] [taskID] >> log.txt &
 Numbers N to N + 2^k - 1 will be run for taskID=0,
   so log2(N) >= 1.0 must be true.
 The next taskID runs the next 2^k numbers.
+To be clear...
+  1.0 <= log2_N < 128.0, though getting close to 128.0 will soon overflow
+  taskID >= 0
 The argument log2(N) will be converted to a double,
   then 2^log2(N) will be converted to an integer.
 To run many processes but only a few at a time, do something like...
@@ -52,6 +55,7 @@ struct timeval tv1, tv2;
 /*
   2^k numbers will be run
   k=30 will take around 3 minutes for a log2(N) just before overflow starts to happen
+  0 <= k < 64
 */
 const int k = 30;
 
@@ -59,7 +63,7 @@ const int k = 30;
 
 /*
   2^k2 is lookup table size for doing k2 steps at once
-  k2 < 37
+  0 < k2 < 37
 */
 const int k2 = 15;
 
@@ -253,7 +257,7 @@ finish:
         if (n > maxNs[newC]) {
             printf("Overflow! nStart = ");
             print128(nStart);
-            break;
+            return 0;
         }
         n *= c3[newC];
         if (n > UINTmax - newB) {
